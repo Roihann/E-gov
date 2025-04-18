@@ -159,6 +159,23 @@ session_start();
             </div>
           </div>
 
+<<<<<<< HEAD
+=======
+          <div class="mb-5">
+            <div class="relative">
+              <input 
+                type="password" 
+                name="password_confirm" 
+                id="password_confirm" 
+                class="w-full p-4 pl-12 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 shadow-sm transition-all" 
+                placeholder="Konfirmasi Kata Sandi" 
+                required
+              >
+              <i class="fas fa-lock absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400"></i>
+            </div>
+          </div>
+
+>>>>>>> main
           <button 
             type="submit" 
             class="w-full bg-blue-600 text-white p-4 rounded-lg hover:bg-blue-700 shadow-md hover:shadow-lg transition-all flex items-center justify-center"
