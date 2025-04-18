@@ -6,6 +6,13 @@ include '../config/db.php';
 $_SESSION['error'] = '';
 $_SESSION['success'] = '';
 
+// Pastikan koneksi database ada
+if (!$conn) {
+    $_SESSION['error'] = 'Koneksi ke database gagal. Silakan coba lagi nanti.';
+    header("Location: ../auth/register.php");
+    exit;
+}
+
 if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     // Check if required fields are set
     if (!isset($_POST['username']) || !isset($_POST['password']) || !isset($_POST['password_confirm'])) {
@@ -53,6 +60,12 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     // Check if username already exists
     $check_query = "SELECT id FROM users WHERE username = ?";
     $check_stmt = mysqli_prepare($conn, $check_query);
+    if (!$check_stmt) {
+        $_SESSION['error'] = 'Terjadi kesalahan pada server. Silakan coba lagi.';
+        header("Location: ../auth/register.php");
+        exit;
+    }
+
     mysqli_stmt_bind_param($check_stmt, 's', $username);
     mysqli_stmt_execute($check_stmt);
     mysqli_stmt_store_result($check_stmt);
@@ -65,17 +78,20 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     }
     mysqli_stmt_close($check_stmt);
 
-    // Hash the password
-    $hashed_password = password_hash($password, PASSWORD_DEFAULT);
-
-    // Insert user into database
+    // Insert user into database (password stored as plaintext)
     $sql = "INSERT INTO users (username, password, role) VALUES (?, ?, 'user')";
     $stmt = mysqli_prepare($conn, $sql);
-    mysqli_stmt_bind_param($stmt, 'ss', $username, $hashed_password);
+    if (!$stmt) {
+        $_SESSION['error'] = 'Terjadi kesalahan pada server. Silakan coba lagi.';
+        header("Location: ../auth/register.php");
+        exit;
+    }
+
+    mysqli_stmt_bind_param($stmt, 'ss', $username, $password);
 
     if (mysqli_stmt_execute($stmt)) {
         $_SESSION['success'] = 'Pendaftaran berhasil! Silakan masuk.';
-        header("Location: ../auth/login.php");
+        header("Location: ../auth/register.php?success=true");
     } else {
         $_SESSION['error'] = 'Gagal mendaftar. Silakan coba lagi.';
         header("Location: ../auth/register.php");
@@ -85,7 +101,9 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     mysqli_stmt_close($stmt);
 } else {
     // Redirect to register page if accessed directly
+    $_SESSION['error'] = 'Silakan daftar melalui form yang tersedia!';
     header("Location: ../auth/register.php");
+    exit;
 }
 
 // No need to close connection explicitly; PHP will handle it
