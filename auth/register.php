@@ -46,6 +46,66 @@ session_start();
       transform: scale(1.02);
       transition: transform 0.2s;
     }
+    /* Pop-up Konfirmasi */
+    .popup {
+      display: none;
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      background-color: #ffffff;
+      padding: 24px;
+      border-radius: 12px;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+      text-align: center;
+      z-index: 1000;
+      animation: popIn 0.3s ease-out;
+      min-width: 280px;
+    }
+    .popup-content {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 16px;
+    }
+    .popup i.checkmark {
+      color: #22c55e; /* Tailwind green-500 */
+      font-size: 48px;
+    }
+    .popup p {
+      font-size: 18px;
+      color: #374151; /* Tailwind gray-700 */
+      margin: 0;
+    }
+    .popup button {
+      background-color: #2563eb; /* Tailwind blue-600 */
+      color: #ffffff;
+      padding: 10px 24px;
+      border-radius: 8px;
+      border: none;
+      font-size: 16px;
+      cursor: pointer;
+      transition: background-color 0.2s;
+    }
+    .popup button:hover {
+      background-color: #1d4ed8; /* Tailwind blue-700 */
+    }
+    /* Animasi Pop-up */
+    @keyframes popIn {
+      0% { opacity: 0; transform: translate(-50%, -50%) scale(0.8); }
+      100% { opacity: 1; transform: translate(-50%, -50%) scale(1); }
+    }
+    /* Overlay */
+    .overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.5);
+      z-index: 999;
+      display: none;
+    }
   </style>
 </head>
 <body>
@@ -69,7 +129,7 @@ session_start();
           <?php unset($_SESSION['success']); ?>
         <?php endif; ?>
 
-        <form method="POST" action="../proses/register_proses.php">
+        <form method="POST" action="../proses/register_proses.php" id="registerForm">
           <div class="mb-5">
             <div class="relative">
               <input 
@@ -99,20 +159,6 @@ session_start();
             </div>
           </div>
 
-          <div class="mb-5">
-            <div class="relative">
-              <input 
-                type="password" 
-                name="password_confirm" 
-                id="password_confirm" 
-                class="w-full p-4 pl-12 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 shadow-sm transition-all" 
-                placeholder="Konfirmasi Kata Sandi" 
-                required
-              >
-              <i class="fas fa-lock absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400"></i>
-            </div>
-          </div>
-
           <button 
             type="submit" 
             class="w-full bg-blue-600 text-white p-4 rounded-lg hover:bg-blue-700 shadow-md hover:shadow-lg transition-all flex items-center justify-center"
@@ -136,5 +182,26 @@ session_start();
       </div>
     </div>
   </div>
+
+  <!-- Pop-up and Overlay -->
+  <div id="popup" class="popup">
+    <div class="popup-content">
+      <i class="fas fa-check-circle checkmark"></i>
+      <p>Akun berhasil dibuat!</p>
+      <button onclick="window.location.href='login.php'">OK</button>
+    </div>
+  </div>
+
+  <div id="overlay" class="overlay"></div>
+
+  <script>
+    // Menampilkan pop-up setelah berhasil registrasi
+    window.onload = function() {
+      <?php if (isset($_GET['success']) && $_GET['success'] == 'true'): ?>
+        document.getElementById("popup").style.display = "block";
+        document.getElementById("overlay").style.display = "block";
+      <?php endif; ?>
+    };
+  </script>
 </body>
 </html>
