@@ -33,7 +33,7 @@ if (!$wisata) {
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
   <style>
     .hero-section {
-      background: linear-gradient(rgba(0, 0, 0, 0.6), rgba(0, 0, 0, 0.6)), url('../assets/images/collage-image.png') no-repeat center center/cover;
+      background: linear-gradient(rgba(0, 0, 0, 0.6), rgba(0, 0, 0, 0.6)), url('../assets/images/menara pandang_index.jpg') no-repeat center center/cover;
       height: 400px;
       display: flex;
       flex-direction: column;
