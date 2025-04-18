@@ -159,6 +159,8 @@ session_start();
             </div>
           </div>
 
+<<<<<<< HEAD
+=======
           <div class="mb-5">
             <div class="relative">
               <input 
@@ -173,6 +175,7 @@ session_start();
             </div>
           </div>
 
+>>>>>>> main
           <button 
             type="submit" 
             class="w-full bg-blue-600 text-white p-4 rounded-lg hover:bg-blue-700 shadow-md hover:shadow-lg transition-all flex items-center justify-center"
