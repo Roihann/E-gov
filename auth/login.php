@@ -105,7 +105,6 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
 </head>
 
 <body>
-<<<<<<< HEAD
     <div class="flex h-screen">
         <!-- Left Section: Login Form -->
         <div class="w-full md:w-1/2 flex items-center justify-center bg-gradient-to-br from-gray-100 to-gray-200">
@@ -157,7 +156,6 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             </div>
         </div>
     </div>
-=======
   <div class="flex h-screen">
     <!-- Left Section: Login Form -->
     <div class="w-full md:w-1/2 flex items-center justify-center bg-gradient-to-br from-blue-50 to-gray-100">
@@ -226,7 +224,6 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
       </div>
     </div>
   </div>
->>>>>>> main
 </body>
 
 </html>
