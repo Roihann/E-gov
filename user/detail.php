@@ -27,6 +27,9 @@ $komentar = mysqli_query($conn, "
 if (!$komentar) {
     die("Query komentar gagal: " . mysqli_error($conn));
 }
+
+// Parse multiple images from foto column (assuming comma-separated)
+$images = !empty($data['foto']) ? explode(',', $data['foto']) : ['default.jpg'];
 ?>
 
 <!DOCTYPE html>
@@ -53,6 +56,36 @@ if (!$komentar) {
       object-fit: cover;
       width: 100%;
     }
+    .carousel {
+      position: relative;
+      overflow: hidden;
+      border-radius: 0.5rem;
+    }
+    .carousel-inner {
+      display: flex;
+      transition: transform 0.5s ease-in-out;
+    }
+    .carousel-item {
+      min-width: 100%;
+      transition: opacity 0.5s ease-in-out;
+    }
+    .carousel-button {
+      position: absolute;
+      top: 50%;
+      transform: translateY(-50%);
+      background: rgba(0, 0, 0, 0.5);
+      color: white;
+      padding: 0.5rem;
+      border: none;
+      cursor: pointer;
+      z-index: 10;
+    }
+    .carousel-button.prev {
+      left: 10px;
+    }
+    .carousel-button.next {
+      right: 10px;
+    }
   </style>
 </head>
 <body>
@@ -77,7 +110,20 @@ if (!$komentar) {
       <div class="md:col-span-2">
         <div class="bg-white rounded-xl shadow-md p-6">
           <h2 class="text-2xl font-bold text-gray-800 mb-4"><?= htmlspecialchars($data['nama']); ?></h2>
-          <img src="../Uploads/<?= htmlspecialchars($data['foto']); ?>" class="wisata-image rounded-lg mb-4" alt="<?= htmlspecialchars($data['nama']); ?>">
+          <!-- Carousel -->
+          <div class="carousel mb-4">
+            <div class="carousel-inner" id="carouselInner">
+              <?php foreach ($images as $index => $image): ?>
+                <div class="carousel-item">
+                  <img src="../Uploads/<?= htmlspecialchars(trim($image)); ?>" class="wisata-image" alt="<?= htmlspecialchars($data['nama']); ?> Image <?= $index + 1; ?>">
+                </div>
+              <?php endforeach; ?>
+            </div>
+            <?php if (count($images) > 1): ?>
+              <button class="carousel-button prev" onclick="moveSlide(-1)"><i class="fas fa-chevron-left"></i></button>
+              <button class="carousel-button next" onclick="moveSlide(1)"><i class="fas fa-chevron-right"></i></button>
+            <?php endif; ?>
+          </div>
           <div class="space-y-4">
             <p><strong class="text-gray-700">Alamat:</strong> <?= htmlspecialchars($data['alamat']); ?></p>
             <p><strong class="text-gray-700">Deskripsi:</strong> <?= htmlspecialchars($data['deskripsi']); ?></p>
@@ -144,5 +190,32 @@ if (!$komentar) {
       </div>
     </div>
   </div>
+
+  <!-- JavaScript for Carousel -->
+  <script>
+    let currentSlide = 0;
+    const slides = document.querySelectorAll('.carousel-item');
+    const totalSlides = slides.length;
+
+    function moveSlide(direction) {
+      currentSlide += direction;
+      if (currentSlide >= totalSlides) {
+        currentSlide = 0;
+      } else if (currentSlide < 0) {
+        currentSlide = totalSlides - 1;
+      }
+      updateCarousel();
+    }
+
+    function updateCarousel() {
+      const carouselInner = document.getElementById('carouselInner');
+      carouselInner.style.transform = `translateX(-${currentSlide * 100}%)`;
+    }
+
+    // Auto-slide every 5 seconds (optional)
+    setInterval(() => {
+      moveSlide(1);
+    }, 5000);
+  </script>
 </body>
 </html>
