@@ -103,8 +103,13 @@ if (!$wisata) {
     <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
       <?php if (mysqli_num_rows($wisata) > 0): ?>
         <?php while ($row = mysqli_fetch_assoc($wisata)): ?>
+          <?php
+          // Extract the first image from the foto column
+          $fotos = !empty($row['foto']) ? explode(',', $row['foto']) : ['default.jpg'];
+          $cover_image = trim($fotos[0]);
+          ?>
           <a href="detail.php?id=<?= $row['id']; ?>" class="wisata-card bg-white rounded-xl shadow-md overflow-hidden">
-            <img src="../Uploads/<?= $row['foto']; ?>" alt="<?= $row['nama']; ?>" class="w-full h-48 object-cover">
+            <img src="../Uploads/<?= htmlspecialchars($cover_image); ?>" alt="<?= htmlspecialchars($row['nama']); ?>" class="w-full h-48 object-cover">
             <div class="p-4 text-center">
               <h5 class="text-lg font-semibold text-gray-800"><?= htmlspecialchars($row['nama']); ?></h5>
             </div>
