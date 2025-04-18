@@ -42,42 +42,32 @@ if (!$wisata) {
   </style>
 </head>
 <body class="bg-gray-100">
+
   <!-- Header -->
-  <nav class="bg-blue-600 text-white p-4">
-    <div class="container mx-auto flex justify-between items-center">
+<nav class="bg-blue-600 text-white p-4">
+  <div class="container mx-auto flex justify-between items-center">
+    <div class="flex items-center space-x-3">
+      <img src="../assets/images/banjarmasin-logo.png" alt="Logo" class="h-12 w-auto">
       <h1 class="text-2xl font-bold">Jelajah Banjarmasin</h1>
-      <div class="flex items-center space-x-4">
-        <!-- Category Dropdown -->
-        <div class="relative">
-          <button class="bg-blue-500 px-4 py-2 rounded-lg hover:bg-blue-700 flex items-center">
-            Kategori <i class="fas fa-chevron-down ml-2"></i>
-          </button>
-          <div class="absolute hidden mt-2 w-48 bg-white text-gray-800 rounded-lg shadow-lg">
-            <a href="#" class="block px-4 py-2 hover:bg-gray-100">Wisata Air Terjun</a>
-            <a href="#" class="block px-4 py-2 hover:bg-gray-100">Wisata Alam dan Buatan</a>
-            <a href="#" class="block px-4 py-2 hover:bg-gray-100">Wisata Budaya</a>
-            <a href="#" class="block px-4 py-2 hover:bg-gray-100">Wisata Gunung</a>
-            <a href="#" class="block px-4 py-2 hover:bg-gray-100">Wisata Pantai</a>
-            <a href="#" class="block px-4 py-2 hover:bg-gray-100">Wisata Religi</a>
-          </div>
-        </div>
-        <!-- Search Bar -->
-        <div class="relative">
-          <input 
-            type="text" 
-            placeholder="Nama Destinasi" 
-            class="px-4 py-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-          >
-          <i class="fas fa-search absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500"></i>
-        </div>
-        <!-- Logout -->
-        <div class="flex items-center space-x-2">
-          <span>Hi, <?= $_SESSION['username']; ?></span>
-          <a href="../auth/logout.php" class="bg-red-500 px-4 py-2 rounded-lg hover:bg-red-600">Logout</a>
-        </div>
+    </div>
+    <div class="flex items-center space-x-4">
+      <!-- Search Bar -->
+      <div class="relative w-96">
+        <input 
+          type="text" 
+          placeholder="Nama Destinasi" 
+          class="w-full px-4 py-2 rounded-lg text-black focus:outline-none focus:ring-2 focus:ring-blue-500"
+        >
+        <i class="fas fa-search absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500"></i>
+      </div>
+      <!-- Logout -->
+      <div class="flex items-center space-x-2">
+        <span>Hi, <?= $_SESSION['username']; ?></span>
+        <a href="../auth/logout.php" class="bg-red-500 px-4 py-2 rounded-lg hover:bg-red-600">Logout</a>
       </div>
     </div>
-  </nav>
+  </div>
+</nav>
 
   <!-- Hero Section -->
   <div class="hero-section">
