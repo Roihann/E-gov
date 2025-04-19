@@ -42,6 +42,10 @@ $images = !empty($data['foto']) ? explode(',', $data['foto']) : ['default.jpg'];
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
   <!-- Animate On Scroll Library -->
   <link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet">
+  <!-- Leaflet CSS -->
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+  <!-- Leaflet JS -->
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
   <style>
     /* Font Modern untuk Gen Z */
     @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap');
@@ -53,7 +57,7 @@ $images = !empty($data['foto']) ? explode(',', $data['foto']) : ['default.jpg'];
 
     /* Header */
     nav {
-      background: linear-gradient(90deg, #4f46e5, #a855f7); /* Gradient Indigo ke Purple */
+      background: linear-gradient(90deg, #4f46e5, #a855f7);
       box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
     }
     nav h1 {
@@ -65,7 +69,7 @@ $images = !empty($data['foto']) ? explode(',', $data['foto']) : ['default.jpg'];
       -webkit-text-fill-color: transparent;
     }
     nav .logout-btn {
-      background: linear-gradient(90deg, #ef4444, #f87171); /* Gradient Merah */
+      background: linear-gradient(90deg, #ef4444, #f87171);
       border-radius: 50px;
       padding: 8px 20px;
       transition: all 0.3s ease;
@@ -110,7 +114,7 @@ $images = !empty($data['foto']) ? explode(',', $data['foto']) : ['default.jpg'];
       position: absolute;
       top: 50%;
       transform: translateY(-50%);
-      background: linear-gradient(90deg, #a855f7, #3b82f6); /* Gradient Purple ke Blue */
+      background: linear-gradient(90deg, #a855f7, #3b82f6);
       color: white;
       padding: 0.5rem;
       border: none;
@@ -140,13 +144,13 @@ $images = !empty($data['foto']) ? explode(',', $data['foto']) : ['default.jpg'];
     .carousel-dot {
       width: 10px;
       height: 10px;
-      background-color: #d1d5db; /* Abu-abu */
+      background-color: #d1d5db;
       border-radius: 50%;
       cursor: pointer;
       transition: all 0.3s ease;
     }
     .carousel-dot.active {
-      background-color: #a855f7; /* Purple */
+      background-color: #a855f7;
       transform: scale(1.2);
     }
     .wisata-image {
@@ -163,7 +167,7 @@ $images = !empty($data['foto']) ? explode(',', $data['foto']) : ['default.jpg'];
       color: #1f2937;
     }
     .detail-info i {
-      color: #a855f7; /* Purple untuk ikon */
+      color: #a855f7;
     }
 
     /* Komentar Card */
@@ -188,7 +192,7 @@ $images = !empty($data['foto']) ? explode(',', $data['foto']) : ['default.jpg'];
       box-shadow: 0 8px 15px rgba(0, 0, 0, 0.1);
     }
     .comment-card .user-icon {
-      background: linear-gradient(90deg, #f97316, #facc15); /* Gradient Orange ke Kuning */
+      background: linear-gradient(90deg, #f97316, #facc15);
       color: #1f2937;
     }
 
@@ -201,7 +205,7 @@ $images = !empty($data['foto']) ? explode(',', $data['foto']) : ['default.jpg'];
       box-shadow: 0 4px 12px rgba(79, 70, 229, 0.2);
     }
     .comment-btn {
-      background: linear-gradient(90deg, #a855f7, #3b82f6); /* Gradient Purple ke Blue */
+      background: linear-gradient(90deg, #a855f7, #3b82f6);
       transition: all 0.3s ease;
     }
     .comment-btn:hover {
@@ -209,7 +213,7 @@ $images = !empty($data['foto']) ? explode(',', $data['foto']) : ['default.jpg'];
       box-shadow: 0 4px 12px rgba(168, 85, 247, 0.4);
     }
     .report-btn {
-      background: linear-gradient(90deg, #f97316, #facc15); /* Gradient Orange ke Kuning */
+      background: linear-gradient(90deg, #f97316, #facc15);
       transition: all 0.3s ease;
     }
     .report-btn:hover {
@@ -219,12 +223,21 @@ $images = !empty($data['foto']) ? explode(',', $data['foto']) : ['default.jpg'];
 
     /* Back Button */
     .back-btn {
-      background: linear-gradient(90deg, #6b7280, #9ca3af); /* Gradient Abu-abu */
+      background: linear-gradient(90deg, #6b7280, #9ca3af);
       transition: all 0.3s ease;
     }
     .back-btn:hover {
       transform: scale(1.05);
       box-shadow: 0 4px 12px rgba(107, 114, 128, 0.4);
+    }
+
+    /* Peta Interaktif */
+    #map {
+        height: 200px;
+        width: 100%;
+        border-radius: 8px;
+        margin-top: 0.5rem;
+        border: 1px solid #d1d5db;
     }
   </style>
 </head>
@@ -273,6 +286,8 @@ $images = !empty($data['foto']) ? explode(',', $data['foto']) : ['default.jpg'];
           <div class="space-y-4">
             <p class="detail-info"><i class="fas fa-map-marker-alt"></i> <strong>Alamat:</strong> <?= htmlspecialchars($data['alamat']); ?></p>
             <p class="detail-info"><i class="fas fa-info-circle"></i> <strong>Deskripsi:</strong> <?= htmlspecialchars($data['deskripsi']); ?></p>
+            <p class="detail-info"><i class="fas fa-map"></i> <strong>Lokasi:</strong></p>
+            <div id="map" data-lat="<?= isset($data['latitude']) ? htmlspecialchars($data['latitude']) : '0.0'; ?>" data-lng="<?= isset($data['longitude']) ? htmlspecialchars($data['longitude']) : '0.0'; ?>"></div>
           </div>
           <a href="index.php" class="back-btn inline-block mt-6 text-white px-4 py-2 rounded-lg">
             <i class="fas fa-arrow-left mr-2"></i> Kembali ke Daftar Tempat Wisata
@@ -392,6 +407,36 @@ $images = !empty($data['foto']) ? explode(',', $data['foto']) : ['default.jpg'];
       duration: 800,
       once: true,
     });
+  </script>
+
+  <!-- Leaflet Map Initialization -->
+  <script>
+      document.addEventListener('DOMContentLoaded', function () {
+          const mapContainer = document.getElementById('map');
+          if (mapContainer) {
+              const lat = parseFloat(mapContainer.getAttribute('data-lat'));
+              const lng = parseFloat(mapContainer.getAttribute('data-lng'));
+
+              // Validasi koordinat
+              if (isNaN(lat) || isNaN(lng) || lat === 0.0 || lng === 0.0) {
+                  mapContainer.innerHTML = '<p class="text-gray-600">Lokasi tidak tersedia.</p>';
+                  return;
+              }
+
+              // Inisialisasi peta
+              const map = L.map('map').setView([lat, lng], 15);
+
+              // Tambahkan tile layer dari OpenStreetMap
+              L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                  attribution: '© <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+              }).addTo(map);
+
+              // Tambahkan marker
+              L.marker([lat, lng]).addTo(map)
+                  .bindPopup('<?= htmlspecialchars($data['nama']); ?>')
+                  .openPopup();
+          }
+      });
   </script>
 </body>
 </html>
