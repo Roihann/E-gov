@@ -1,36 +1,5 @@
 <?php
 session_start();
-include '../config/db.php';
-
-$error = '';
-if ($_SERVER['REQUEST_METHOD'] == 'POST') {
-    $username = $_POST['username'];
-    $password = $_POST['password'];
-
-    // Sanitize input to prevent SQL injection
-    $username = mysqli_real_escape_string($conn, $username);
-    
-    // Query to fetch user data based on username
-    $result = mysqli_query($conn, "SELECT * FROM users WHERE username = '$username'");
-    $user = mysqli_fetch_assoc($result);
-
-    // Check if user exists and password matches (directly compared without hash)
-    if ($user && $password == $user['password']) {
-        $_SESSION['user_id'] = $user['id'];
-        $_SESSION['username'] = $user['username'];
-        $_SESSION['role'] = $user['role'];
-
-        // Redirect based on user role
-        if ($user['role'] == 'admin') {
-            header("Location: ../admin/dashboard.php");
-        } else {
-            header("Location: ../user/index.php");
-        }
-        exit;
-    } else {
-        $error = 'Username atau kata sandi salah!';
-    }
-}
 ?>
 
 <!DOCTYPE html>
@@ -38,7 +7,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Login - Sistem Informasi Pariwisata Banjarmasin</title>
+  <title>Masuk - Sistem Informasi Pariwisata Banjarmasin</title>
   <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
   <style>
@@ -77,6 +46,20 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
       transform: scale(1.02);
       transition: transform 0.2s;
     }
+    /* Show Password Icon */
+    .password-toggle {
+      position: absolute;
+      right: 16px;
+      top: 50%;
+      transform: translateY(-50%);
+      cursor: pointer;
+      color: #6b7280; /* Tailwind gray-500 */
+      font-size: 18px;
+      transition: color 0.2s;
+    }
+    .password-toggle:hover {
+      color: #2563eb; /* Tailwind blue-600 */
+    }
   </style>
 </head>
 <body>
@@ -86,13 +69,21 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
       <div class="form-container w-full max-w-md p-8 bg-white rounded-2xl shadow-xl">
         <h3 class="text-3xl font-bold text-gray-800 mb-6 text-center">Masuk ke Akun Anda</h3>
 
-        <?php if ($error): ?>
+        <?php if (isset($_SESSION['error']) && $_SESSION['error']): ?>
           <div class="bg-red-100 text-red-700 p-4 rounded-lg mb-6 text-center animate-pulse">
-            <?= htmlspecialchars($error); ?>
+            <?= htmlspecialchars($_SESSION['error']); ?>
           </div>
+          <?php unset($_SESSION['error']); ?>
         <?php endif; ?>
 
-        <form method="POST">
+        <?php if (isset($_SESSION['success']) && $_SESSION['success']): ?>
+          <div class="bg-green-100 text-green-700 p-4 rounded-lg mb-6 text-center animate-pulse">
+            <?= htmlspecialchars($_SESSION['success']); ?>
+          </div>
+          <?php unset($_SESSION['success']); ?>
+        <?php endif; ?>
+
+        <form method="POST" action="../proses/login_proses.php" id="loginForm">
           <div class="mb-5">
             <div class="relative">
               <input 
@@ -114,11 +105,11 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                 type="password" 
                 name="password" 
                 id="password" 
-                class="w-full p-4 pl-12 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 shadow-sm transition-all" 
+                class="w-full p-4 pr-12 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 shadow-sm transition-all" 
                 placeholder="Kata Sandi" 
                 required
               >
-              <i class="fas fa-lock absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400"></i>
+              <i class="fas fa-eye password-toggle" id="togglePassword"></i>
             </div>
           </div>
 
@@ -130,12 +121,11 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
           </button>
         </form>
 
-        <div class="flex justify-between mt-4 text-sm text-gray-600">
-          <a href="#" class="text-blue-500 hover:underline">Lupa kata sandi?</a>
-          <span>
-            Belum punya akun? <a href="register.php" class="text-blue-500 hover:underline">Daftar</a>
-          </span>
-        </div>
+        <p class="mt-4 text-center text-gray-600">
+          <a href="forgot_password.php" class="text-blue-500 hover:underline">Lupa kata sandi?</a>
+          <span class="mx-2">|</span>
+          Belum punya akun? <a href="register.php" class="text-blue-500 hover:underline">Daftar</a>
+        </p>
       </div>
     </div>
 
@@ -148,5 +138,17 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
       </div>
     </div>
   </div>
+
+  <script>
+    // Toggle password visibility for password field
+    const togglePassword = document.getElementById('togglePassword');
+    const passwordInput = document.getElementById('password');
+    togglePassword.addEventListener('click', function() {
+      const type = passwordInput.getAttribute('type') === 'password' ? 'text' : 'password';
+      passwordInput.setAttribute('type', type);
+      this.classList.toggle('fa-eye');
+      this.classList.toggle('fa-eye-slash');
+    });
+  </script>
 </body>
 </html>
