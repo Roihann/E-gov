@@ -9,7 +9,7 @@ if (!isset($_SESSION['user_id']) || $_SESSION['role'] != 'admin') {
 
 if (isset($_GET['id'])) {
     $id = (int)$_GET['id'];
-    $query = "DELETE FROM komentar WHERE id = $id";
+    $query = "DELETE FROM users WHERE id = $id";
     if (mysqli_query($conn, $query)) {
         header("Location: dashboard.php");
     } else {
