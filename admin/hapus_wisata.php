@@ -28,21 +28,4 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
 }
 ?>
 
-<!-- <!DOCTYPE html>
-<html>
-<head>
-  <title>Hapus Tempat Wisata</title>
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
-</head>
-<body class="bg-light">
-<div class="container py-4">
-  <h2 class="mb-4">Hapus Tempat Wisata</h2>
-  <p>Apakah Anda yakin ingin menghapus tempat wisata <strong><?= $data['nama']; ?></strong>?</p>
-  <form method="POST">
-    <button type="submit" class="btn btn-danger w-100">Hapus</button>
-  </form>
-  <a href="dashboard.php" class="btn btn-secondary w-100 mt-3">Batal</a>
-</div>
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
-</body>
-</html> -->
+

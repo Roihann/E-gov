@@ -19,113 +19,44 @@ $data = mysqli_fetch_assoc($wisata);
 $error_message = '';
 $success_message = '';
 
-if ($_SERVER['REQUEST_METHOD'] == 'POST') {
-    // Debugging: Cetak semua data yang diterima
-    error_log("POST Data: " . print_r($_POST, true));
-    error_log("FILES Data: " . print_r($_FILES, true));
-
-    // Handle hapus foto
-    if (isset($_POST['delete_foto'])) {
-        $foto_to_delete = mysqli_real_escape_string($conn, $_POST['delete_foto']);
-        $foto_names = !empty($data['foto']) ? explode(',', $data['foto']) : [];
-        $file_path = "../Uploads/" . $foto_to_delete;
-
-        if (file_exists($file_path)) {
-            if (unlink($file_path)) {
-                // Hapus foto dari array
-                $foto_names = array_filter($foto_names, function($foto) use ($foto_to_delete) {
-                    return $foto !== $foto_to_delete;
-                });
-                $foto_string = implode(',', $foto_names);
-
-                // Update database dengan foto yang tersisa
-                $sql = "UPDATE wisata SET foto='$foto_string' WHERE id=$wisata_id";
-                if (mysqli_query($conn, $sql)) {
-                    header("Location: edit_wisata.php?id=$wisata_id&hapus=success");
-                    exit;
-                } else {
-                    header("Location: edit_wisata.php?id=$wisata_id&hapus=error&msg=" . urlencode("Gagal mengupdate database: " . mysqli_error($conn)));
-                    exit;
-                }
-            } else {
-                header("Location: edit_wisata.php?id=$wisata_id&hapus=error&msg=" . urlencode("Gagal menghapus foto $foto_to_delete dari server."));
-                exit;
-            }
-        } else {
-            header("Location: edit_wisata.php?id=$wisata_id&hapus=error&msg=" . urlencode("File foto $foto_to_delete tidak ditemukan."));
-            exit;
-        }
-    }
-
-    // Handle update wisata
-    $nama = mysqli_real_escape_string($conn, $_POST['nama'] ?? '');
-    $alamat = mysqli_real_escape_string($conn, $_POST['alamat'] ?? '');
-    $deskripsi = mysqli_real_escape_string($conn, $_POST['deskripsi'] ?? '');
-    $longitude = mysqli_real_escape_string($conn, $_POST['longitude'] ?? '');
-    $latitude = mysqli_real_escape_string($conn, $_POST['latitude'] ?? '');
-    $fotos = isset($_FILES['fotos']) ? $_FILES['fotos'] : null;
-
-    // Ambil foto yang ada
-    $foto_names = !empty($data['foto']) ? explode(',', $data['foto']) : [];
-    $target_dir = "../Uploads/";
-
-    // Pastikan folder Uploads ada dan dapat ditulis
-    if (!is_dir($target_dir)) {
-        mkdir($target_dir, 0777, true);
-    }
-    if (!is_writable($target_dir)) {
-        $error_message = "Folder Uploads tidak dapat ditulis. Periksa izin folder.";
-    } else {
-        // Handle new file uploads
-        if ($fotos && !empty($fotos['name'][0])) {
-            foreach ($fotos['name'] as $key => $name) {
-                if ($fotos['error'][$key] == UPLOAD_ERR_OK) {
-                    $target_file = $target_dir . basename($name);
-                    $imageFileType = strtolower(pathinfo($target_file, PATHINFO_EXTENSION));
-                    
-                    // Validate file type and size
-                    $allowed_types = ['jpg', 'jpeg', 'png', 'gif'];
-                    if (!in_array($imageFileType, $allowed_types)) {
-                        $error_message .= "Tipe file $name tidak diizinkan. Gunakan JPG, JPEG, PNG, atau GIF. ";
-                        continue;
-                    }
-                    if ($fotos['size'][$key] > 5 * 1024 * 1024) {
-                        $error_message .= "Ukuran file $name terlalu besar. Maksimum 5MB. ";
-                        continue;
-                    }
-                    if (move_uploaded_file($fotos['tmp_name'][$key], $target_file)) {
-                        $foto_names[] = basename($name);
-                        $success_message .= "Foto $name berhasil diupload. ";
-                    } else {
-                        $error_message .= "Gagal mengupload foto $name. Periksa izin folder Uploads atau konfigurasi server. ";
-                    }
-                } elseif ($fotos['error'][$key] != UPLOAD_ERR_NO_FILE) {
-                    $error_message .= "Error upload foto: " . $fotos['error'][$key] . ". ";
-                }
-            }
-        }
-
-        // Join filenames into a comma-separated string
-        $foto_string = implode(',', $foto_names);
-
-        // Update data tempat wisata
-        $sql = "UPDATE wisata SET nama='$nama', alamat='$alamat', deskripsi='$deskripsi', longitude='$longitude', latitude='$latitude', foto='$foto_string' WHERE id=$wisata_id";
-        if (mysqli_query($conn, $sql)) {
-            $success_message .= "Tempat wisata berhasil diperbarui!";
-            header("Location: dashboard.php?success=1");
-            exit;
-        } else {
-            $error_message .= "Gagal mengupdate wisata: " . mysqli_error($conn);
-        }
+// Tangani pesan status dari update_wisata.php
+if (isset($_GET['status'])) {
+    if ($_GET['status'] == 'success') {
+        $success_message = isset($_GET['msg']) ? urldecode($_GET['msg']) : "Tempat wisata berhasil diperbarui!";
+    } elseif ($_GET['status'] == 'error') {
+        $error_message = isset($_GET['msg']) ? urldecode($_GET['msg']) : "Gagal memperbarui tempat wisata.";
     }
 }
 
-// Pesan hapus foto
-if (isset($_GET['hapus'])) {
-    if ($_GET['hapus'] == 'success') {
-        $success_message = "Foto berhasil dihapus!";
-    } elseif ($_GET['hapus'] == 'error') {
-        $error_message = isset($_GET['msg']) ? urldecode($_GET['msg']) : "Gagal menghapus foto.";
+// Handle hapus foto
+if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['delete_foto'])) {
+    $foto_to_delete = mysqli_real_escape_string($conn, $_POST['delete_foto']);
+    $foto_names = !empty($data['foto']) ? explode(',', $data['foto']) : [];
+    $file_path = "../Uploads/" . $foto_to_delete;
+
+    if (file_exists($file_path)) {
+        if (unlink($file_path)) {
+            // Hapus foto dari array
+            $foto_names = array_filter($foto_names, function($foto) use ($foto_to_delete) {
+                return $foto !== $foto_to_delete;
+            });
+            $foto_string = implode(',', $foto_names);
+
+            // Update database dengan foto yang tersisa
+            $sql = "UPDATE wisata SET foto='$foto_string' WHERE id=$wisata_id";
+            if (mysqli_query($conn, $sql)) {
+                $success_message = "Foto berhasil dihapus!";
+                // Refresh data setelah hapus foto
+                $wisata = mysqli_query($conn, "SELECT * FROM wisata WHERE id = $wisata_id");
+                $data = mysqli_fetch_assoc($wisata);
+            } else {
+                $error_message = "Gagal mengupdate database: " . mysqli_error($conn);
+            }
+        } else {
+            $error_message = "Gagal menghapus foto $foto_to_delete dari server.";
+        }
+    } else {
+        $error_message = "File foto $foto_to_delete tidak ditemukan.";
     }
 }
 ?>
@@ -188,10 +119,10 @@ if (isset($_GET['hapus'])) {
       from { opacity: 0; transform: translateY(20px); }
       to { opacity: 1; transform: translateY(0); }
     }
-    .form-container input, .form-container textarea {
+    .form-container input, .form-container textarea, .form-container select {
       transition: transform 0.2s;
     }
-    .form-container input:focus, .form-container textarea:focus {
+    .form-container input:focus, .form-container textarea:focus, .form-container select:focus {
       transform: scale(1.02);
       outline: none;
       border-color: #2563eb;
@@ -279,7 +210,7 @@ if (isset($_GET['hapus'])) {
       Admin Panel
     </div>
     <a href="dashboard.php" class="flex items-center"><i class="fas fa-home mr-2"></i> Dashboard</a>
-    <a href="tambah_wisata.php" class="flex items-center active"><i class="fas fa-plus mr-2"></i> Tambah Wisata</a>
+    <a href="tambah_wisata.php" class="flex items-center"><i class="fas fa-plus mr-2"></i> Tambah Wisata</a>
   </div>
 
   <!-- Main Content -->
@@ -294,9 +225,11 @@ if (isset($_GET['hapus'])) {
       <?php if ($success_message): ?>
         <div class="success-message">
           <?= htmlspecialchars($success_message); ?>
+          <a href="dashboard.php" class="underline text-blue-600 ml-2">Kembali ke Dashboard</a>
         </div>
       <?php endif; ?>
-      <form method="POST" enctype="multipart/form-data">
+      <form method="POST" action="update_wisata.php" enctype="multipart/form-data">
+        <input type="hidden" name="id" value="<?= $wisata_id; ?>">
         <div class="mb-5">
           <label for="nama" class="block text-gray-900 font-medium mb-2">Nama Tempat Wisata</label>
           <div class="relative">
@@ -327,6 +260,26 @@ if (isset($_GET['hapus'])) {
           </div>
         </div>
 
+        <!-- Dropdown Kecamatan -->
+        <div class="mb-5">
+          <label for="kecamatan" class="block text-gray-900 font-medium mb-2">Kecamatan</label>
+          <div class="relative">
+            <select 
+              name="kecamatan" 
+              id="kecamatan" 
+              class="w-full p-4 pl-12 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 shadow-sm transition-all" 
+              required
+            >
+              <option value="Banjarmasin Selatan" <?= $data['kecamatan'] == 'Banjarmasin Selatan' ? 'selected' : ''; ?>>Banjarmasin Selatan</option>
+              <option value="Banjarmasin Utara" <?= $data['kecamatan'] == 'Banjarmasin Utara' ? 'selected' : ''; ?>>Banjarmasin Utara</option>
+              <option value="Banjarmasin Timur" <?= $data['kecamatan'] == 'Banjarmasin Timur' ? 'selected' : ''; ?>>Banjarmasin Timur</option>
+              <option value="Banjarmasin Barat" <?= $data['kecamatan'] == 'Banjarmasin Barat' ? 'selected' : ''; ?>>Banjarmasin Barat</option>
+              <option value="Banjarmasin Tengah" <?= $data['kecamatan'] == 'Banjarmasin Tengah' ? 'selected' : ''; ?>>Banjarmasin Tengah</option>
+            </select>
+            <i class="fas fa-map-pin absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400"></i>
+          </div>
+        </div>
+
         <div class="mb-5">
           <label for="deskripsi" class="block text-gray-900 font-medium mb-2">Deskripsi</label>
           <div class="relative">
@@ -352,7 +305,7 @@ if (isset($_GET['hapus'])) {
                   name="longitude" 
                   id="longitude" 
                   class="w-full p-4 pl-12 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 shadow-sm transition-all" 
-                  value="<?= htmlspecialchars($data['longitude'] ?? ''); ?>" 
+                  value="<?= htmlspecialchars($data['longitude'] ?? '0'); ?>" 
                   required
                 >
                 <i class="fas fa-globe absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400"></i>
@@ -367,7 +320,7 @@ if (isset($_GET['hapus'])) {
                   name="latitude" 
                   id="latitude" 
                   class="w-full p-4 pl-12 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 shadow-sm transition-all" 
-                  value="<?= htmlspecialchars($data['latitude'] ?? ''); ?>" 
+                  value="<?= htmlspecialchars($data['latitude'] ?? '0'); ?>" 
                   required
                 >
                 <i class="fas fa-globe absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400"></i>
@@ -457,7 +410,7 @@ if (isset($_GET['hapus'])) {
 
     // Show Toast if Success
     window.onload = function() {
-      <?php if (isset($_GET['success']) && $_GET['success'] == '1'): ?>
+      <?php if ($success_message): ?>
         const toast = document.getElementById('toast');
         toast.style.display = 'block';
         setTimeout(() => {
