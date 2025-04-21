@@ -2,20 +2,17 @@
 session_start();
 include '../config/db.php';
 
-// Redirect to login if not authenticated
 if (!isset($_SESSION['user_id']) || $_SESSION['role'] != 'user') {
     header("Location: ../auth/login.php");
     exit;
 }
 
-// Tangkap keyword pencarian jika ada
 $keyword = isset($_GET['search']) ? mysqli_real_escape_string($conn, $_GET['search']) : '';
 
-// Query berdasarkan keyword atau semua data
 if (!empty($keyword)) {
-    $wisata = mysqli_query($conn, "SELECT * FROM wisata WHERE nama LIKE '%$keyword%'");
+    $wisata = mysqli_query($conn, "SELECT id, nama, foto, kecamatan FROM wisata WHERE nama LIKE '%$keyword%'");
 } else {
-    $wisata = mysqli_query($conn, "SELECT * FROM wisata");
+    $wisata = mysqli_query($conn, "SELECT id, nama, foto, kecamatan FROM wisata");
 }
 
 if (!$wisata) {
@@ -31,10 +28,8 @@ if (!$wisata) {
   <title>Jelajah Banjarmasin</title>
   <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
-  <!-- Animate On Scroll Library -->
   <link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet">
   <style>
-    /* Font Modern untuk Gen Z */
     @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap');
 
     body {
@@ -42,9 +37,8 @@ if (!$wisata) {
       background-color: #f0f4f8;
     }
 
-    /* Header */
     nav {
-      background: linear-gradient(90deg, #4f46e5, #a855f7); /* Gradient Indigo ke Purple */
+      background: linear-gradient(90deg, #4f46e5, #a855f7);
       box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
     }
     nav h1 {
@@ -65,7 +59,7 @@ if (!$wisata) {
       box-shadow: 0 2px 12px rgba(79, 70, 229, 0.3);
     }
     nav .logout-btn {
-      background: linear-gradient(90deg, #ef4444, #f87171); /* Gradient Merah */
+      background: linear-gradient(90deg, #ef4444, #f87171);
       border-radius: 50px;
       padding: 8px 20px;
       transition: all 0.3s ease;
@@ -75,7 +69,6 @@ if (!$wisata) {
       box-shadow: 0 4px 12px rgba(239, 68, 68, 0.3);
     }
 
-    /* Hero Section */
     .hero-section {
       background: linear-gradient(rgba(0, 0, 0, 0.6), rgba(0, 0, 0, 0.6)), url('../assets/images/menara pandang_index.jpg') no-repeat center center/cover;
       height: 500px;
@@ -86,13 +79,13 @@ if (!$wisata) {
       color: white;
       text-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
       position: relative;
-      background-attachment: fixed; /* Efek parallax sederhana */
+      background-attachment: fixed;
     }
     .hero-section h2 {
       font-size: 3rem;
       font-weight: 700;
       letter-spacing: 2px;
-      color: #ffffff; /* Warna putih polos */
+      color: #ffffff;
       animation: fadeIn 1.5s ease-in-out;
     }
     .hero-section img {
@@ -100,7 +93,7 @@ if (!$wisata) {
     }
     .hero-section .cta-btn {
       margin-top: 20px;
-      background: linear-gradient(90deg, #f97316, #facc15); /* Gradient Orange ke Kuning */
+      background: linear-gradient(90deg, #f97316, #facc15);
       color: #1f2937;
       font-weight: 600;
       padding: 12px 24px;
@@ -116,7 +109,6 @@ if (!$wisata) {
       to { opacity: 1; transform: translateY(0); }
     }
 
-    /* Grid Kartu Wisata */
     .wisata-card {
       position: relative;
       background: white;
@@ -142,7 +134,7 @@ if (!$wisata) {
       position: absolute;
       top: 10px;
       left: 10px;
-      background: linear-gradient(90deg, #f97316, #facc15); /* Gradient Orange ke Kuning */
+      background: linear-gradient(90deg, #f97316, #facc15);
       color: #1f2937;
       font-size: 12px;
       font-weight: 600;
@@ -169,7 +161,7 @@ if (!$wisata) {
     }
     .wisata-card .location i {
       margin-right: 6px;
-      color: #a855f7; /* Purple untuk ikon */
+      color: #a855f7;
     }
   </style>
 </head>
@@ -182,7 +174,6 @@ if (!$wisata) {
         <h1 class="text-xl">Jelajah Banjarmasin</h1>
       </div>
       <div class="flex items-center space-x-6">
-        <!-- Search Form -->
         <form action="" method="GET" class="relative w-80">
           <input 
             type="text" 
@@ -195,7 +186,6 @@ if (!$wisata) {
             <i class="fas fa-search text-gray-500"></i>
           </button>
         </form>
-        <!-- User Info and Logout -->
         <div class="flex items-center space-x-4">
           <span class="text-sm">Hi, <?= htmlspecialchars($_SESSION['username']); ?></span>
           <a href="../auth/logout.php" class="logout-btn text-white">Logout</a>
@@ -222,7 +212,6 @@ if (!$wisata) {
         <?php $index = 0; ?>
         <?php while ($row = mysqli_fetch_assoc($wisata)): ?>
           <?php
-          // Extract the first image from the foto column
           $fotos = !empty($row['foto']) ? explode(',', $row['foto']) : ['default.jpg'];
           $cover_image = trim($fotos[0]);
           $index++;
@@ -233,7 +222,7 @@ if (!$wisata) {
               <h5><?= htmlspecialchars($row['nama']); ?></h5>
               <p class="location">
                 <i class="fas fa-map-marker-alt"></i>
-                Banjarmasin
+                <?= htmlspecialchars($row['kecamatan']); ?>
               </p>
             </div>
           </a>

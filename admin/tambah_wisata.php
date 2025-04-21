@@ -11,26 +11,24 @@ $error_message = '';
 $success_message = '';
 
 if ($_SERVER['REQUEST_METHOD'] == 'POST') {
-    // Debugging: Cetak semua data yang diterima
     error_log("POST Data: " . print_r($_POST, true));
     error_log("FILES Data: " . print_r($_FILES, true));
 
     $nama = mysqli_real_escape_string($conn, $_POST['nama'] ?? '');
     $alamat = mysqli_real_escape_string($conn, $_POST['alamat'] ?? '');
     $deskripsi = mysqli_real_escape_string($conn, $_POST['deskripsi'] ?? '');
+    $kecamatan = mysqli_real_escape_string($conn, $_POST['kecamatan'] ?? 'Banjarmasin'); // Ambil kecamatan dari form
     $fotos = isset($_FILES['fotos']) ? $_FILES['fotos'] : null;
 
     $foto_names = [];
     $target_dir = "../Uploads/";
 
-    // Pastikan folder Uploads ada dan dapat ditulis
     if (!is_dir($target_dir)) {
         mkdir($target_dir, 0777, true);
     }
     if (!is_writable($target_dir)) {
         $error_message = "Folder Uploads tidak dapat ditulis. Periksa izin folder.";
     } else {
-        // Handle multiple file uploads
         if ($fotos && !empty($fotos['name'][0])) {
             $total_files = count($fotos['name']);
             if ($total_files > 5) {
@@ -40,8 +38,6 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                     if ($fotos['error'][$key] == UPLOAD_ERR_OK) {
                         $target_file = $target_dir . basename($name);
                         $imageFileType = strtolower(pathinfo($target_file, PATHINFO_EXTENSION));
-                        
-                        // Validate file type and size
                         $allowed_types = ['jpg', 'jpeg', 'png', 'gif'];
                         if (!in_array($imageFileType, $allowed_types)) {
                             $error_message .= "Tipe file $name tidak diizinkan. Gunakan JPG, JPEG, PNG, atau GIF. ";
@@ -64,13 +60,10 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             }
         }
 
-        // Jika tidak ada error, lanjutkan menyimpan ke database
         if (empty($error_message)) {
-            // Join filenames into a comma-separated string
             $foto_string = implode(',', $foto_names);
-
-            // Insert data into database
-            $sql = "INSERT INTO wisata (nama, alamat, deskripsi, foto) VALUES ('$nama', '$alamat', '$deskripsi', '$foto_string')";
+            // Simpan kecamatan ke database
+            $sql = "INSERT INTO wisata (nama, alamat, deskripsi, foto, kecamatan) VALUES ('$nama', '$alamat', '$deskripsi', '$foto_string', '$kecamatan')";
             if (mysqli_query($conn, $sql)) {
                 $success_message .= "Tempat wisata berhasil ditambahkan!";
                 header("Location: dashboard.php?success=1");
@@ -141,10 +134,10 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
       from { opacity: 0; transform: translateY(20px); }
       to { opacity: 1; transform: translateY(0); }
     }
-    .form-container input, .form-container textarea {
+    .form-container input, .form-container textarea, .form-container select {
       transition: transform 0.2s;
     }
-    .form-container input:focus, .form-container textarea:focus {
+    .form-container input:focus, .form-container textarea:focus, .form-container select:focus {
       transform: scale(1.02);
       outline: none;
       border-color: #2563eb;
@@ -259,6 +252,26 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
           </div>
         </div>
 
+        <!-- Dropdown Kecamatan -->
+        <div class="mb-5">
+          <label for="kecamatan" class="block text-gray-900 font-medium mb-2">Kecamatan</label>
+          <div class="relative">
+            <select 
+              name="kecamatan" 
+              id="kecamatan" 
+              class="w-full p-4 pl-12 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 shadow-sm transition-all" 
+              required
+            >
+              <option value="Banjarmasin Selatan">Banjarmasin Selatan</option>
+              <option value="Banjarmasin Utara">Banjarmasin Utara</option>
+              <option value="Banjarmasin Timur">Banjarmasin Timur</option>
+              <option value="Banjarmasin Barat">Banjarmasin Barat</option>
+              <option value="Banjarmasin Tengah">Banjarmasin Tengah</option>
+            </select>
+            <i class="fas fa-map-pin absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400"></i>
+          </div>
+        </div>
+
         <div class="mb-5">
           <label for="deskripsi" class="block text-gray-900 font-medium mb-2">Deskripsi</label>
           <div class="relative">
@@ -307,19 +320,17 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
   </div>
 
   <script>
-    // Toggle Sidebar
     function toggleSidebar() {
       document.querySelector('.sidebar').classList.toggle('open');
     }
 
-    // Preview Foto Baru
     document.getElementById('fotos').addEventListener('change', function(event) {
       const preview = document.getElementById('preview');
-      preview.innerHTML = ''; // Clear previous previews
+      preview.innerHTML = '';
       const files = event.target.files;
       if (files.length > 5) {
         alert('Anda hanya dapat mengunggah maksimal 5 gambar.');
-        event.target.value = ''; // Reset input
+        event.target.value = '';
         return;
       }
       for (let i = 0; i < files.length; i++) {
@@ -336,7 +347,6 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
       }
     });
 
-    // Show Toast if Success
     window.onload = function() {
       <?php if (isset($_GET['success']) && $_GET['success'] == '1'): ?>
         const toast = document.getElementById('toast');
