@@ -18,6 +18,8 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     $nama = mysqli_real_escape_string($conn, $_POST['nama'] ?? '');
     $alamat = mysqli_real_escape_string($conn, $_POST['alamat'] ?? '');
     $deskripsi = mysqli_real_escape_string($conn, $_POST['deskripsi'] ?? '');
+    $longitude = mysqli_real_escape_string($conn, $_POST['longitude'] ?? '');
+    $latitude = mysqli_real_escape_string($conn, $_POST['latitude'] ?? '');
     $fotos = isset($_FILES['fotos']) ? $_FILES['fotos'] : null;
 
     $foto_names = [];
@@ -70,7 +72,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             $foto_string = implode(',', $foto_names);
 
             // Insert data into database
-            $sql = "INSERT INTO wisata (nama, alamat, deskripsi, foto) VALUES ('$nama', '$alamat', '$deskripsi', '$foto_string')";
+            $sql = "INSERT INTO wisata (nama, alamat, deskripsi, longitude, latitude, foto) VALUES ('$nama', '$alamat', '$deskripsi', '$longitude', '$latitude', '$foto_string')";
             if (mysqli_query($conn, $sql)) {
                 $success_message .= "Tempat wisata berhasil ditambahkan!";
                 header("Location: dashboard.php?success=1");
@@ -270,6 +272,39 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
               required
             ></textarea>
             <i class="fas fa-pen absolute left-4 top-4 text-gray-400"></i>
+          </div>
+        </div>
+
+        <div class="mb-5">
+          <div class="flex gap-4">
+            <div class="flex-1">
+              <label for="longitude" class="block text-gray-900 font-medium mb-2">Longitude</label>
+              <div class="relative">
+                <input 
+                  type="number" 
+                  step="any" 
+                  name="longitude" 
+                  id="longitude" 
+                  class="w-full p-4 pl-12 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 shadow-sm transition-all" 
+                  required
+                >
+                <i class="fas fa-globe absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400"></i>
+              </div>
+            </div>
+            <div class="flex-1">
+              <label for="latitude" class="block text-gray-900 font-medium mb-2">Latitude</label>
+              <div class="relative">
+                <input 
+                  type="number" 
+                  step="any" 
+                  name="latitude" 
+                  id="latitude" 
+                  class="w-full p-4 pl-12 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 shadow-sm transition-all" 
+                  required
+                >
+                <i class="fas fa-globe absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400"></i>
+              </div>
+            </div>
           </div>
         </div>
 

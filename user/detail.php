@@ -195,6 +195,11 @@ $images = !empty($data['foto']) ? explode(',', $data['foto']) : ['default.jpg'];
       background: linear-gradient(90deg, #f97316, #facc15);
       color: #1f2937;
     }
+    .comment-card p {
+      max-width: 60ch; /* Approx 60 characters */
+      overflow-wrap: break-word; /* Ensure long words break */
+      word-break: break-word; /* Additional breaking for very long strings */
+    }
 
     /* Comment Form */
     .comment-textarea {
@@ -312,7 +317,7 @@ $images = !empty($data['foto']) ? explode(',', $data['foto']) : ['default.jpg'];
                       <p class="text-sm text-gray-500"><?= htmlspecialchars($k['created_at']); ?></p>
                     </div>
                   </div>
-                  <p class="text-gray-700"><?= htmlspecialchars($k['isi_komentar']); ?></p>
+                  <p class="text-gray-700 break-words"><?= htmlspecialchars($k['isi_komentar']); ?></p>
                 </div>
               <?php endwhile; ?>
             <?php else: ?>
