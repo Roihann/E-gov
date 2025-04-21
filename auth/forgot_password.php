@@ -7,7 +7,7 @@ session_start();
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Daftar - Sistem Informasi Pariwisata Banjarmasin</title>
+  <title>Lupa Kata Sandi - Sistem Informasi Pariwisata Banjarmasin</title>
   <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
   <style>
@@ -109,95 +109,14 @@ session_start();
   </style>
 </head>
 <body>
-<<<<<<< HEAD
-  <div class="flex h-screen">
-    <!-- Left Section: Register Form -->
-    <div class="w-full md:w-1/2 flex items-center justify-center bg-gradient-to-br from-blue-50 to-gray-100">
-      <div class="form-container w-full max-w-md p-8 bg-white rounded-2xl shadow-xl">
-        <h3 class="text-3xl font-bold text-gray-800 mb-6 text-center">Daftar Akun Baru</h3>
-
-        <?php if (isset($_SESSION['error']) && $_SESSION['error']): ?>
-          <div class="bg-red-100 text-red-700 p-4 rounded-lg mb-6 text-center animate-pulse">
-            <?= htmlspecialchars($_SESSION['error']); ?>
-          </div>
-          <?php unset($_SESSION['error']); ?>
-        <?php endif; ?>
-
-        <?php if (isset($_SESSION['success']) && $_SESSION['success']): ?>
-          <div class="bg-green-100 text-green-700 p-4 rounded-lg mb-6 text-center animate-pulse">
-            <?= htmlspecialchars($_SESSION['success']); ?>
-          </div>
-          <?php unset($_SESSION['success']); ?>
-        <?php endif; ?>
-
-        <form method="POST" action="../proses/register_proses.php" id="registerForm">
-          <div class="mb-5">
-            <div class="relative">
-              <input 
-                type="text" 
-                name="username" 
-                id="username" 
-                class="w-full p-4 pl-12 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 shadow-sm transition-all" 
-                placeholder="Username" 
-                required 
-                autofocus
-              >
-              <i class="fas fa-user absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400"></i>
-            </div>
-          </div>
-
-          <div class="mb-5">
-            <div class="relative">
-              <input 
-                type="password" 
-                name="password" 
-                id="password" 
-                class="w-full p-4 pl-12 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 shadow-sm transition-all" 
-                placeholder="Kata Sandi" 
-                required
-              >
-              <i class="fas fa-lock absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400"></i>
-            </div>
-          </div>
-
-<<<<<<< HEAD
-=======
-          <div class="mb-5">
-            <div class="relative">
-              <input 
-                type="password" 
-                name="password_confirm" 
-                id="password_confirm" 
-                class="w-full p-4 pl-12 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 shadow-sm transition-all" 
-                placeholder="Konfirmasi Kata Sandi" 
-                required
-              >
-              <i class="fas fa-lock absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400"></i>
-            </div>
-          </div>
-
->>>>>>> main
-          <button 
-            type="submit" 
-            class="w-full bg-blue-600 text-white p-4 rounded-lg hover:bg-blue-700 shadow-md hover:shadow-lg transition-all flex items-center justify-center"
-          >
-            <i class="fas fa-user-plus mr-2"></i> Daftar
-          </button>
-        </form>
-
-        <p class="mt-4 text-center text-gray-600">
-          Sudah punya akun? <a href="login.php" class="text-blue-500 hover:underline">Masuk di sini</a>
-        </p>
-=======
   <div class="overlay"></div>
   <div class="flex items-center justify-center h-screen relative z-10">
     <div class="form-container p-8 rounded-2xl shadow-xl">
       <!-- Logo Banjarmasin di atas form -->
       <div class="flex justify-center mb-6">
         <img src="../assets/images/banjarmasin-logo.png" alt="Banjarmasin Logo" class="w-32 logo">
->>>>>>> main
       </div>
-      <h3 class="text-3xl font-bold text-gray-800 mb-6 text-center">Daftar Akun Baru</h3>
+      <h3 class="text-3xl font-bold text-gray-800 mb-6 text-center">Lupa Kata Sandi</h3>
 
       <?php if (isset($_SESSION['error']) && $_SESSION['error']): ?>
         <div class="bg-red-100 text-red-700 p-4 rounded-lg mb-6 text-center animate-pulse">
@@ -213,7 +132,7 @@ session_start();
         <?php unset($_SESSION['success']); ?>
       <?php endif; ?>
 
-      <form method="POST" action="../proses/register_proses.php" id="registerForm">
+      <form method="POST" action="../proses/forgot_password_proses.php" id="forgotPasswordForm">
         <div class="mb-5">
           <div class="relative">
             <input 
@@ -233,13 +152,13 @@ session_start();
           <div class="relative">
             <input 
               type="password" 
-              name="password" 
-              id="password" 
+              name="new_password" 
+              id="new_password" 
               class="w-full p-4 pr-12 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 shadow-sm transition-all" 
-              placeholder="Kata Sandi" 
+              placeholder="Kata Sandi Baru" 
               required
             >
-            <i class="fas fa-eye password-toggle" id="togglePassword"></i>
+            <i class="fas fa-eye password-toggle" id="toggleNewPassword"></i>
           </div>
         </div>
 
@@ -247,13 +166,13 @@ session_start();
           <div class="relative">
             <input 
               type="password" 
-              name="password_confirm" 
-              id="password_confirm" 
+              name="new_password_confirm" 
+              id="new_password_confirm" 
               class="w-full p-4 pr-12 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 shadow-sm transition-all" 
-              placeholder="Konfirmasi Kata Sandi" 
+              placeholder="Konfirmasi Kata Sandi Baru" 
               required
             >
-            <i class="fas fa-eye password-toggle" id="togglePasswordConfirm"></i>
+            <i class="fas fa-eye password-toggle" id="toggleNewPasswordConfirm"></i>
           </div>
         </div>
 
@@ -261,12 +180,12 @@ session_start();
           type="submit" 
           class="w-full bg-blue-600 text-white p-4 rounded-lg hover:bg-blue-700 shadow-md hover:shadow-lg transition-all flex items-center justify-center"
         >
-          <i class="fas fa-user-plus mr-2"></i> Daftar
+          <i class="fas fa-key mr-2"></i> Ubah Kata Sandi
         </button>
       </form>
 
       <p class="mt-4 text-center text-gray-600">
-        Sudah punya akun? <a href="login.php" class="text-blue-500 hover:underline">Masuk di sini</a>
+        Kembali ke <a href="login.php" class="text-blue-500 hover:underline">Masuk</a>
       </p>
 
       <!-- Teks Sistem Informasi Pariwisata di bawah form -->
@@ -280,7 +199,7 @@ session_start();
   <div id="popup" class="popup">
     <div class="popup-content">
       <i class="fas fa-check-circle checkmark"></i>
-      <p>Akun berhasil dibuat!</p>
+      <p>Kata sandi berhasil diubah!</p>
       <button onclick="window.location.href='login.php'">OK</button>
     </div>
   </div>
@@ -288,7 +207,7 @@ session_start();
   <div id="overlay" class="overlay"></div>
 
   <script>
-    // Menampilkan pop-up setelah berhasil registrasi
+    // Menampilkan pop-up setelah berhasil mengubah kata sandi
     window.onload = function() {
       <?php if (isset($_GET['success']) && $_GET['success'] == 'true'): ?>
         document.getElementById("popup").style.display = "block";
@@ -296,22 +215,22 @@ session_start();
       <?php endif; ?>
     };
 
-    // Toggle password visibility for password field
-    const togglePassword = document.getElementById('togglePassword');
-    const passwordInput = document.getElementById('password');
-    togglePassword.addEventListener('click', function() {
-      const type = passwordInput.getAttribute('type') === 'password' ? 'text' : 'password';
-      passwordInput.setAttribute('type', type);
+    // Toggle password visibility for new_password field
+    const toggleNewPassword = document.getElementById('toggleNewPassword');
+    const newPasswordInput = document.getElementById('new_password');
+    toggleNewPassword.addEventListener('click', function() {
+      const type = newPasswordInput.getAttribute('type') === 'password' ? 'text' : 'password';
+      newPasswordInput.setAttribute('type', type);
       this.classList.toggle('fa-eye');
       this.classList.toggle('fa-eye-slash');
     });
 
-    // Toggle password visibility for password_confirm field
-    const togglePasswordConfirm = document.getElementById('togglePasswordConfirm');
-    const passwordConfirmInput = document.getElementById('password_confirm');
-    togglePasswordConfirm.addEventListener('click', function() {
-      const type = passwordConfirmInput.getAttribute('type') === 'password' ? 'text' : 'password';
-      passwordConfirmInput.setAttribute('type', type);
+    // Toggle password visibility for new_password_confirm field
+    const toggleNewPasswordConfirm = document.getElementById('toggleNewPasswordConfirm');
+    const newPasswordConfirmInput = document.getElementById('new_password_confirm');
+    toggleNewPasswordConfirm.addEventListener('click', function() {
+      const type = newPasswordConfirmInput.getAttribute('type') === 'password' ? 'text' : 'password';
+      newPasswordConfirmInput.setAttribute('type', type);
       this.classList.toggle('fa-eye');
       this.classList.toggle('fa-eye-slash');
     });

@@ -40,46 +40,171 @@ $pengaduan = mysqli_query($conn, "
     WHERE pengaduan.wisata_id = $wisata_id
     ORDER BY pengaduan.created_at DESC
 ");
-
 ?>
 
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-  <title>Komentar & Pengaduan - <?= htmlspecialchars($data_wisata['nama']); ?></title>
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Komentar & Pengaduan - <?= htmlspecialchars($data_wisata['nama']); ?> - Sistem Informasi Pariwisata Banjarmasin</title>
+  <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+  <style>
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: url('../assets/images/Budaya-Menara-Pandang-Banjarmasin.jpg') no-repeat center center/cover;
+      position: relative;
+      min-height: 100vh;
+      margin: 0;
+    }
+    .sidebar {
+      background: linear-gradient(to bottom, #3b82f6, #2563eb);
+      color: white;
+      height: 100vh;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 250px;
+      padding-top: 1rem;
+      transition: transform 0.3s;
+    }
+    .sidebar a {
+      color: white;
+      padding: 0.75rem 1.5rem;
+      display: flex;
+      align-items: center;
+      transition: background 0.3s;
+    }
+    .sidebar a:hover, .sidebar a.active {
+      background: rgba(255, 255, 255, 0.2);
+    }
+    .content {
+      margin-left: 250px;
+      padding: 2rem;
+      min-height: 100vh;
+    }
+    .card-container {
+      animation: fadeIn 1s ease-in-out;
+      background: rgba(255, 255, 255, 1);
+      max-width: 800px;
+      width: 100%;
+      padding: 2rem;
+      border-radius: 1rem;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+      margin: 0 auto;
+    }
+    .comment-card, .complaint-card {
+      background: #f9fafb;
+      padding: 1rem;
+      border-radius: 0.5rem;
+      margin-bottom: 1rem;
+      transition: transform 0.2s;
+    }
+    .comment-card:hover, .complaint-card:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+    }
+    .delete-btn {
+      background-color: #ef4444;
+      color: white;
+      border-radius: 0.375rem;
+      padding: 0.5rem 1rem;
+      transition: background-color 0.2s;
+    }
+    .delete-btn:hover {
+      background-color: #dc2626;
+    }
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    @media (max-width: 768px) {
+      .sidebar {
+        width: 200px;
+        transform: translateX(-100%);
+      }
+      .sidebar.open {
+        transform: translateX(0);
+      }
+      .content {
+        margin-left: 0;
+      }
+    }
+  </style>
 </head>
-<body class="bg-light">
-<div class="container py-4">
-  <h2 class="mb-4">Komentar & Pengaduan untuk <?= htmlspecialchars($data_wisata['nama']); ?></h2>
-
-  <div class="mb-4">
-    <h4>Komentar</h4>
-    <?php while ($row = mysqli_fetch_assoc($komentar)): ?>
-      <div class="mb-3 border-bottom pb-2">
-        <strong><?= htmlspecialchars($row['username']); ?>:</strong><br>
-        <p><?= htmlspecialchars($row['isi_komentar']); ?></p>
-        <small class="text-muted"><?= $row['created_at']; ?></small>
-        <a href="hapus_komentar.php?id=<?= $row['komentar_id']; ?>" class="btn btn-danger btn-sm mt-2" onclick="return confirm('Apakah Anda yakin ingin menghapus komentar ini?')">Hapus</a>
-      </div>
-    <?php endwhile; ?>
+<body>
+  <!-- Sidebar -->
+  <div class="sidebar">
+    <div class="p-4 text-xl font-bold border-b border-blue-500">
+      Admin Panel
+    </div>
+    <a href="dashboard.php" class="flex items-center"><i class="fas fa-home mr-2"></i> Dashboard</a>
+    <a href="tambah_wisata.php" class="flex items-center"><i class="fas fa-plus mr-2"></i> Tambah Wisata</a>
   </div>
 
-  <div>
-    <h4>Pengaduan</h4>
-    <?php while ($row = mysqli_fetch_assoc($pengaduan)): ?>
-      <div class="mb-3 border-bottom pb-2">
-        <strong><?= htmlspecialchars($row['username']); ?>:</strong><br>
-        <p><?= htmlspecialchars($row['isi_pengaduan']); ?></p>
-        <small class="text-muted"><?= $row['created_at']; ?></small>
-        <a href="hapus_pengaduan.php?id=<?= $row['pengaduan_id']; ?>" class="btn btn-danger btn-sm mt-2" onclick="return confirm('Apakah Anda yakin ingin menghapus pengaduan ini?')">Hapus</a>
+  <!-- Main Content -->
+  <div class="content">
+    <div class="card-container">
+      <h2 class="text-2xl font-semibold text-gray-900 mb-6 text-center">Komentar & Pengaduan untuk <?= htmlspecialchars($data_wisata['nama']); ?></h2>
+
+      <!-- Komentar -->
+      <div class="mb-6">
+        <h4 class="text-lg font-semibold text-gray-900 mb-4">Komentar</h4>
+        <?php if (mysqli_num_rows($komentar) > 0): ?>
+          <?php while ($row = mysqli_fetch_assoc($komentar)): ?>
+            <div class="comment-card">
+              <div class="flex justify-between items-start">
+                <div>
+                  <strong class="text-gray-800"><?= htmlspecialchars($row['username']); ?>:</strong>
+                  <p class="text-gray-700 mt-1"><?= htmlspecialchars($row['isi_komentar']); ?></p>
+                  <small class="text-gray-600"><?= $row['created_at']; ?></small>
+                </div>
+                <a href="hapus_komentar.php?id=<?= $row['komentar_id']; ?>" class="delete-btn flex items-center" onclick="return confirm('Apakah Anda yakin ingin menghapus komentar ini?')">
+                  <i class="fas fa-trash mr-1"></i> Hapus
+                </a>
+              </div>
+            </div>
+          <?php endwhile; ?>
+        <?php else: ?>
+          <p class="text-gray-600 text-center">Belum ada komentar untuk tempat wisata ini.</p>
+        <?php endif; ?>
       </div>
-    <?php endwhile; ?>
+
+      <!-- Pengaduan -->
+      <div>
+        <h4 class="text-lg font-semibold text-gray-900 mb-4">Pengaduan</h4>
+        <?php if (mysqli_num_rows($pengaduan) > 0): ?>
+          <?php while ($row = mysqli_fetch_assoc($pengaduan)): ?>
+            <div class="complaint-card">
+              <div class="flex justify-between items-start">
+                <div>
+                  <strong class="text-gray-800"><?= htmlspecialchars($row['username']); ?>:</strong>
+                  <p class="text-gray-700 mt-1"><?= htmlspecialchars($row['isi_pengaduan']); ?></p>
+                  <small class="text-gray-600"><?= $row['created_at']; ?></small>
+                </div>
+                <a href="hapus_pengaduan.php?id=<?= $row['pengaduan_id']; ?>" class="delete-btn flex items-center" onclick="return confirm('Apakah Anda yakin ingin menghapus pengaduan ini?')">
+                  <i class="fas fa-trash mr-1"></i> Hapus
+                </a>
+              </div>
+            </div>
+          <?php endwhile; ?>
+        <?php else: ?>
+          <p class="text-gray-600 text-center">Belum ada pengaduan untuk tempat wisata ini.</p>
+        <?php endif; ?>
+      </div>
+
+      <a href="dashboard.php" class="mt-6 inline-block bg-blue-600 text-white py-3 px-6 rounded-lg hover:bg-blue-700 shadow-md hover:shadow-lg transition-all">
+        <i class="fas fa-arrow-left mr-2"></i> Kembali ke Dashboard
+      </a>
+    </div>
   </div>
 
-  <a href="dashboard.php" class="btn btn-secondary mt-4">Kembali ke Dashboard</a>
-</div>
-
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+  <script>
+    // Toggle Sidebar
+    function toggleSidebar() {
+      document.querySelector('.sidebar').classList.toggle('open');
+    }
+  </script>
 </body>
 </html>
