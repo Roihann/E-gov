@@ -222,7 +222,7 @@ unset($_SESSION['error']);
                   <p class="text-gray-700 mt-1 break-words"><?= htmlspecialchars($row['isi_pengaduan']); ?></p>
                   <small class="text-gray-600"><?= $row['created_at']; ?></small>
                 </div>
-                <a href="hapus_pengaduan.php?id=<?= $row['pengaduan_id']; ?>" class="delete-btn flex items-center" onclick="return confirm('Apakah Anda yakin ingin menghapus pengaduan ini?')">
+                <a href="hapus_pengaduan.php?id=<?= $row['pengaduan_id']; ?>&wisata_id=<?= $wisata_id; ?>" class="delete-btn flex items-center" onclick="return confirm('Apakah Anda yakin ingin menghapus pengaduan ini?')">
                   <i class="fas fa-trash mr-1"></i> Hapus
                 </a>
               </div>
