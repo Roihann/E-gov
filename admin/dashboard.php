@@ -7,6 +7,12 @@ if (!isset($_SESSION['user_id']) || $_SESSION['role'] != 'admin') {
     exit;
 }
 
+// Handle success or error messages from session
+$success_message = isset($_SESSION['success']) ? $_SESSION['success'] : '';
+$error_message = isset($_SESSION['error']) ? $_SESSION['error'] : '';
+unset($_SESSION['success']);
+unset($_SESSION['error']);
+
 // Ambil data tempat wisata
 $limit = 5; // Jumlah data per halaman
 $page = isset($_GET['page']) ? (int)$_GET['page'] : 1;
@@ -157,6 +163,67 @@ if (!$total_users_result) {
       z-index: 1000;
       animation: slideIn 0.3s ease-out;
     }
+    .success-message {
+      background-color: #d4edda;
+      color: #155724;
+      padding: 1rem;
+      border-radius: 0.375rem;
+      margin-bottom: 1rem;
+    }
+    .error-message {
+      background-color: #f8d7da;
+      color: #721c24;
+      padding: 1rem;
+      border-radius: 0.375rem;
+      margin-bottom: 1rem;
+    }
+    /* Modal Styles */
+    .modal {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-color: rgba(0, 0, 0, 0.5);
+      z-index: 1000;
+      justify-content: center;
+      align-items: center;
+    }
+    .modal-content {
+      background: white;
+      padding: 2rem;
+      border-radius: 1rem;
+      max-width: 500px;
+      width: 90%;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+    }
+    .btn-danger {
+      background-color: #ef4444;
+      color: white;
+      padding: 0.75rem 1.5rem;
+      border-radius: 0.375rem;
+      transition: background-color 0.2s;
+      display: flex;
+      justify-content: center;
+      width: 100%;
+    }
+    .btn-danger:hover {
+      background-color: #dc2626;
+    }
+    .btn-secondary {
+      background-color: #6b7280;
+      color: white;
+      padding: 0.75rem 1.5rem;
+      border-radius: 0.375rem;
+      transition: background-color 0.2s;
+      display: flex;
+      justify-content: center;
+      width: 100%;
+    }
+    .btn-secondary:hover {
+      background-color: #4b5563;
+    }
     @keyframes slideIn {
       from { opacity: 0; transform: translateX(100%); }
       to { opacity: 1; transform: translateX(0); }
@@ -202,6 +269,18 @@ if (!$total_users_result) {
         </a>
       </div>
     </div>
+
+    <!-- Display Success or Error Messages -->
+    <?php if ($success_message): ?>
+      <div class="success-message">
+        <?= htmlspecialchars($success_message); ?>
+      </div>
+    <?php endif; ?>
+    <?php if ($error_message): ?>
+      <div class="error-message">
+        <?= htmlspecialchars($error_message); ?>
+      </div>
+    <?php endif; ?>
 
     <!-- Stats Card -->
     <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-6">
@@ -268,9 +347,9 @@ if (!$total_users_result) {
                     <a href="edit_wisata.php?id=<?= $row['id']; ?>" class="bg-yellow-500 text-white px-3 py-1 rounded-lg hover:bg-yellow-600 transition-all mr-2">
                       <i class="fas fa-edit mr-1"></i> Edit
                     </a>
-                    <a href="hapus_wisata.php?id=<?= $row['id']; ?>" class="bg-red-500 text-white px-3 py-1 rounded-lg hover:bg-red-600 transition-all" onclick="return confirmDelete(event)">
+                    <button onclick="openDeleteModal(<?= $row['id']; ?>)" class="bg-red-500 text-white px-3 py-1 rounded-lg hover:bg-red-600 transition-all">
                       <i class="fas fa-trash mr-1"></i> Hapus
-                    </a>
+                    </button>
                   </td>
                 </tr>
               <?php endwhile; ?>
@@ -335,6 +414,13 @@ if (!$total_users_result) {
     </div>
   </div>
 
+  <!-- Modal Container -->
+  <div id="deleteModal" class="modal">
+    <div id="modalContent" class="modal-content">
+      <!-- Modal content will be loaded here via AJAX -->
+    </div>
+  </div>
+
   <!-- Toast Notification -->
   <div id="toast" class="toast">
     Aksi berhasil dilakukan!
@@ -354,12 +440,69 @@ if (!$total_users_result) {
       return true;
     }
 
-    function showToast() {
+    function showToast(message = 'Aksi berhasil dilakukan!') {
       const toast = document.getElementById('toast');
+      toast.textContent = message;
       toast.style.display = 'block';
       setTimeout(() => {
         toast.style.display = 'none';
       }, 3000);
+    }
+
+    function openDeleteModal(wisataId) {
+      const modal = document.getElementById('deleteModal');
+      const modalContent = document.getElementById('modalContent');
+
+      // Fetch the confirmation form from hapus_wisata.php
+      fetch(`hapus_wisata.php?id=${wisataId}&modal=true`)
+        .then(response => response.text())
+        .then(data => {
+          modalContent.innerHTML = data;
+          modal.style.display = 'flex';
+
+          // Attach event listener to the form inside the modal
+          const form = modalContent.querySelector('form');
+          if (form) {
+            form.addEventListener('submit', function(e) {
+              e.preventDefault();
+              const formData = new FormData(form);
+
+              // Submit the form via AJAX
+              fetch(`hapus_wisata.php?id=${wisataId}`, {
+                method: 'POST',
+                body: formData
+              })
+                .then(response => response.json())
+                .then(result => {
+                  if (result.success) {
+                    showToast(result.message);
+                    modal.style.display = 'none';
+                    // Refresh the page to update the wisata list
+                    window.location.reload();
+                  } else {
+                    showToast(result.message);
+                    modal.style.display = 'none';
+                  }
+                })
+                .catch(error => {
+                  showToast('Terjadi kesalahan saat menghapus.');
+                  modal.style.display = 'none';
+                });
+            });
+          }
+
+          // Attach event listener to the "Batal" button
+          const cancelButton = modalContent.querySelector('.btn-secondary');
+          if (cancelButton) {
+            cancelButton.addEventListener('click', (e) => {
+              e.preventDefault();
+              modal.style.display = 'none';
+            });
+          }
+        })
+        .catch(error => {
+          showToast('Gagal memuat form penghapusan.');
+        });
     }
   </script>
 </body>
