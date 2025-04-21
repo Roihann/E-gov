@@ -24,48 +24,6 @@ $stmt->close();
 $error_message = '';
 $success_message = '';
 
-<<<<<<< HEAD
-// Tangani pesan status dari update_wisata.php
-if (isset($_GET['status'])) {
-    if ($_GET['status'] == 'success') {
-        $success_message = isset($_GET['msg']) ? urldecode($_GET['msg']) : "Tempat wisata berhasil diperbarui!";
-    } elseif ($_GET['status'] == 'error') {
-        $error_message = isset($_GET['msg']) ? urldecode($_GET['msg']) : "Gagal memperbarui tempat wisata.";
-    }
-}
-
-// Handle hapus foto
-if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['delete_foto'])) {
-    $foto_to_delete = mysqli_real_escape_string($conn, $_POST['delete_foto']);
-    $foto_names = !empty($data['foto']) ? explode(',', $data['foto']) : [];
-    $file_path = "../Uploads/" . $foto_to_delete;
-
-    if (file_exists($file_path)) {
-        if (unlink($file_path)) {
-            // Hapus foto dari array
-            $foto_names = array_filter($foto_names, function($foto) use ($foto_to_delete) {
-                return $foto !== $foto_to_delete;
-            });
-            $foto_string = implode(',', $foto_names);
-
-            // Update database dengan foto yang tersisa
-            $sql = "UPDATE wisata SET foto='$foto_string' WHERE id=$wisata_id";
-            if (mysqli_query($conn, $sql)) {
-                $success_message = "Foto berhasil dihapus!";
-                // Refresh data setelah hapus foto
-                $wisata = mysqli_query($conn, "SELECT * FROM wisata WHERE id = $wisata_id");
-                $data = mysqli_fetch_assoc($wisata);
-            } else {
-                $error_message = "Gagal mengupdate database: " . mysqli_error($conn);
-            }
-        } else {
-            $error_message = "Gagal menghapus foto $foto_to_delete dari server.";
-        }
-    } else {
-        $error_message = "File foto $foto_to_delete tidak ditemukan.";
-    }
-}
-=======
 if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     // Handle photo deletion (via AJAX)
     if (isset($_POST['delete_foto'])) {
@@ -175,7 +133,6 @@ $stmt->bind_param("i", $wisata_id);
 $stmt->execute();
 $data = $stmt->get_result()->fetch_assoc();
 $stmt->close();
->>>>>>> ziman2
 ?>
 
 <!DOCTYPE html>
@@ -398,12 +355,7 @@ $stmt->close();
           <a href="dashboard.php" class="underline text-blue-600 ml-2">Kembali ke Dashboard</a>
         </div>
       <?php endif; ?>
-<<<<<<< HEAD
-      <form method="POST" action="update_wisata.php" enctype="multipart/form-data">
-        <input type="hidden" name="id" value="<?= $wisata_id; ?>">
-=======
       <form id="updateWisataForm" method="POST" enctype="multipart/form-data">
->>>>>>> ziman2
         <div class="mb-5">
           <label for="nama" class="block text-gray-900 font-medium mb-2">Nama Tempat Wisata</label>
           <div class="relative">
@@ -596,13 +548,6 @@ $stmt->close();
       }
     });
 
-<<<<<<< HEAD
-    // Show Toast if Success
-    window.onload = function() {
-      <?php if ($success_message): ?>
-        const toast = document.getElementById('toast');
-        toast.style.display = 'block';
-=======
     // Show Toast
     function showToast(message = 'Aksi berhasil dilakukan!') {
       const toast = document.getElementById('toast');
@@ -617,7 +562,6 @@ $stmt->close();
     document.addEventListener('DOMContentLoaded', function() {
       const messages = document.querySelectorAll('.success-message, .error-message');
       messages.forEach(message => {
->>>>>>> ziman2
         setTimeout(() => {
           message.style.opacity = '0';
           setTimeout(() => message.remove(), 300);
