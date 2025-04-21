@@ -9,67 +9,70 @@ if (!isset($_SESSION['user_id']) || $_SESSION['role'] != 'admin') {
 
 $wisata_id = isset($_GET['id']) ? (int)$_GET['id'] : 0;
 
-// Ambil data tempat wisata yang akan diedit
-$wisata = mysqli_query($conn, "SELECT * FROM wisata WHERE id = $wisata_id");
-if (!$wisata || mysqli_num_rows($wisata) == 0) {
+// Fetch wisata data
+$stmt = $conn->prepare("SELECT * FROM wisata WHERE id = ?");
+$stmt->bind_param("i", $wisata_id);
+$stmt->execute();
+$result = $stmt->get_result();
+
+if (!$result || $result->num_rows == 0) {
     die("Tempat wisata tidak ditemukan.");
 }
-$data = mysqli_fetch_assoc($wisata);
+$data = $result->fetch_assoc();
+$stmt->close();
 
 $error_message = '';
 $success_message = '';
 
 if ($_SERVER['REQUEST_METHOD'] == 'POST') {
-    // Debugging: Cetak semua data yang diterima
-    error_log("POST Data: " . print_r($_POST, true));
-    error_log("FILES Data: " . print_r($_FILES, true));
-
-    // Handle hapus foto
+    // Handle photo deletion (via AJAX)
     if (isset($_POST['delete_foto'])) {
-        $foto_to_delete = mysqli_real_escape_string($conn, $_POST['delete_foto']);
+        $foto_to_delete = $_POST['delete_foto'];
         $foto_names = !empty($data['foto']) ? explode(',', $data['foto']) : [];
         $file_path = "../Uploads/" . $foto_to_delete;
 
         if (file_exists($file_path)) {
             if (unlink($file_path)) {
-                // Hapus foto dari array
+                // Remove photo from array
                 $foto_names = array_filter($foto_names, function($foto) use ($foto_to_delete) {
-                    return $foto !== $foto_to_delete;
+                    return trim($foto) !== trim($foto_to_delete);
                 });
                 $foto_string = implode(',', $foto_names);
 
-                // Update database dengan foto yang tersisa
-                $sql = "UPDATE wisata SET foto='$foto_string' WHERE id=$wisata_id";
-                if (mysqli_query($conn, $sql)) {
-                    header("Location: edit_wisata.php?id=$wisata_id&hapus=success");
-                    exit;
+                // Update database with remaining photos
+                $stmt = $conn->prepare("UPDATE wisata SET foto = ? WHERE id = ?");
+                $stmt->bind_param("si", $foto_string, $wisata_id);
+                if ($stmt->execute()) {
+                    $response = ['success' => true, 'message' => 'Foto berhasil dihapus!'];
                 } else {
-                    header("Location: edit_wisata.php?id=$wisata_id&hapus=error&msg=" . urlencode("Gagal mengupdate database: " . mysqli_error($conn)));
-                    exit;
+                    $response = ['success' => false, 'message' => 'Gagal mengupdate database: ' . $conn->error];
                 }
+                $stmt->close();
             } else {
-                header("Location: edit_wisata.php?id=$wisata_id&hapus=error&msg=" . urlencode("Gagal menghapus foto $foto_to_delete dari server."));
-                exit;
+                $response = ['success' => false, 'message' => "Gagal menghapus foto $foto_to_delete dari server."];
             }
         } else {
-            header("Location: edit_wisata.php?id=$wisata_id&hapus=error&msg=" . urlencode("File foto $foto_to_delete tidak ditemukan."));
-            exit;
+            $response = ['success' => false, 'message' => "File foto $foto_to_delete tidak ditemukan."];
         }
+
+        header('Content-Type: application/json');
+        echo json_encode($response);
+        exit;
     }
 
     // Handle update wisata
-    $nama = mysqli_real_escape_string($conn, $_POST['nama'] ?? '');
-    $alamat = mysqli_real_escape_string($conn, $_POST['alamat'] ?? '');
-    $deskripsi = mysqli_real_escape_string($conn, $_POST['deskripsi'] ?? '');
-    $longitude = mysqli_real_escape_string($conn, $_POST['longitude'] ?? '');
-    $latitude = mysqli_real_escape_string($conn, $_POST['latitude'] ?? '');
+    $nama = $_POST['nama'] ?? '';
+    $alamat = $_POST['alamat'] ?? '';
+    $deskripsi = $_POST['deskripsi'] ?? '';
+    $longitude = $_POST['longitude'] ?? '';
+    $latitude = $_POST['latitude'] ?? '';
     $fotos = isset($_FILES['fotos']) ? $_FILES['fotos'] : null;
 
-    // Ambil foto yang ada
+    // Fetch current photos
     $foto_names = !empty($data['foto']) ? explode(',', $data['foto']) : [];
     $target_dir = "../Uploads/";
 
-    // Pastikan folder Uploads ada dan dapat ditulis
+    // Ensure Uploads folder exists and is writable
     if (!is_dir($target_dir)) {
         mkdir($target_dir, 0777, true);
     }
@@ -80,9 +83,11 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         if ($fotos && !empty($fotos['name'][0])) {
             foreach ($fotos['name'] as $key => $name) {
                 if ($fotos['error'][$key] == UPLOAD_ERR_OK) {
-                    $target_file = $target_dir . basename($name);
+                    // Sanitize filename
+                    $sanitized_name = preg_replace("/[^A-Za-z0-9._-]/", "_", basename($name));
+                    $target_file = $target_dir . $sanitized_name;
                     $imageFileType = strtolower(pathinfo($target_file, PATHINFO_EXTENSION));
-                    
+
                     // Validate file type and size
                     $allowed_types = ['jpg', 'jpeg', 'png', 'gif'];
                     if (!in_array($imageFileType, $allowed_types)) {
@@ -94,7 +99,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                         continue;
                     }
                     if (move_uploaded_file($fotos['tmp_name'][$key], $target_file)) {
-                        $foto_names[] = basename($name);
+                        $foto_names[] = $sanitized_name;
                         $success_message .= "Foto $name berhasil diupload. ";
                     } else {
                         $error_message .= "Gagal mengupload foto $name. Periksa izin folder Uploads atau konfigurasi server. ";
@@ -108,26 +113,26 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         // Join filenames into a comma-separated string
         $foto_string = implode(',', $foto_names);
 
-        // Update data tempat wisata
-        $sql = "UPDATE wisata SET nama='$nama', alamat='$alamat', deskripsi='$deskripsi', longitude='$longitude', latitude='$latitude', foto='$foto_string' WHERE id=$wisata_id";
-        if (mysqli_query($conn, $sql)) {
-            $success_message .= "Tempat wisata berhasil diperbarui!";
-            header("Location: dashboard.php?success=1");
+        // Update wisata data using prepared statement
+        $stmt = $conn->prepare("UPDATE wisata SET nama = ?, alamat = ?, deskripsi = ?, longitude = ?, latitude = ?, foto = ? WHERE id = ?");
+        $stmt->bind_param("ssssssi", $nama, $alamat, $deskripsi, $longitude, $latitude, $foto_string, $wisata_id);
+        if ($stmt->execute()) {
+            $_SESSION['success'] = "Tempat wisata berhasil diperbarui!";
+            header("Location: dashboard.php");
             exit;
         } else {
-            $error_message .= "Gagal mengupdate wisata: " . mysqli_error($conn);
+            $error_message .= "Gagal mengupdate wisata: " . $conn->error;
         }
+        $stmt->close();
     }
 }
 
-// Pesan hapus foto
-if (isset($_GET['hapus'])) {
-    if ($_GET['hapus'] == 'success') {
-        $success_message = "Foto berhasil dihapus!";
-    } elseif ($_GET['hapus'] == 'error') {
-        $error_message = isset($_GET['msg']) ? urldecode($_GET['msg']) : "Gagal menghapus foto.";
-    }
-}
+// Fetch updated wisata data for display
+$stmt = $conn->prepare("SELECT * FROM wisata WHERE id = ?");
+$stmt->bind_param("i", $wisata_id);
+$stmt->execute();
+$data = $stmt->get_result()->fetch_assoc();
+$stmt->close();
 ?>
 
 <!DOCTYPE html>
@@ -183,6 +188,8 @@ if (isset($_GET['hapus'])) {
       padding: 2rem;
       border-radius: 1rem;
       box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+      position: relative;
+      z-index: 1;
     }
     @keyframes fadeIn {
       from { opacity: 0; transform: translateY(20px); }
@@ -228,6 +235,10 @@ if (isset($_GET['hapus'])) {
     .photo-preview .delete-btn:hover {
       background-color: #dc2626;
     }
+    .update-btn {
+      cursor: pointer;
+      z-index: 10;
+    }
     .toast {
       position: fixed;
       top: 20px;
@@ -240,19 +251,66 @@ if (isset($_GET['hapus'])) {
       z-index: 1000;
       animation: slideIn 0.3s ease-out;
     }
-    .error-message {
-      background-color: #f8d7da;
-      color: #721c24;
+    .error-message, .success-message {
       padding: 1rem;
       border-radius: 0.375rem;
       margin-bottom: 1rem;
+      transition: opacity 0.3s ease;
+    }
+    .error-message {
+      background-color: #f8d7da;
+      color: #721c24;
     }
     .success-message {
       background-color: #d4edda;
       color: #155724;
-      padding: 1rem;
+    }
+    /* Modal Styles */
+    .modal {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-color: rgba(0, 0, 0, 0.5);
+      z-index: 1000;
+      justify-content: center;
+      align-items: center;
+    }
+    .modal-content {
+      background: white;
+      padding: 2rem;
+      border-radius: 1rem;
+      max-width: 500px;
+      width: 90%;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+    }
+    .btn-danger {
+      background-color: #ef4444;
+      color: white;
+      padding: 0.75rem 1.5rem;
       border-radius: 0.375rem;
-      margin-bottom: 1rem;
+      transition: background-color 0.2s;
+      display: flex;
+      justify-content: center;
+      width: 100%;
+    }
+    .btn-danger:hover {
+      background-color: #dc2626;
+    }
+    .btn-secondary {
+      background-color: #6b7280;
+      color: white;
+      padding: 0.75rem 1.5rem;
+      border-radius: 0.375rem;
+      transition: background-color 0.2s;
+      display: flex;
+      justify-content: center;
+      width: 100%;
+    }
+    .btn-secondary:hover {
+      background-color: #4b5563;
     }
     @keyframes slideIn {
       from { opacity: 0; transform: translateX(100%); }
@@ -296,7 +354,7 @@ if (isset($_GET['hapus'])) {
           <?= htmlspecialchars($success_message); ?>
         </div>
       <?php endif; ?>
-      <form method="POST" enctype="multipart/form-data">
+      <form id="updateWisataForm" method="POST" enctype="multipart/form-data">
         <div class="mb-5">
           <label for="nama" class="block text-gray-900 font-medium mb-2">Nama Tempat Wisata</label>
           <div class="relative">
@@ -384,12 +442,9 @@ if (isset($_GET['hapus'])) {
             foreach ($fotos as $foto): ?>
               <div class="relative">
                 <img src="../Uploads/<?= htmlspecialchars($foto); ?>" alt="Foto Wisata">
-                <form method="POST">
-                  <input type="hidden" name="delete_foto" value="<?= htmlspecialchars($foto); ?>">
-                  <button type="submit" class="delete-btn">
-                    <i class="fas fa-times"></i>
-                  </button>
-                </form>
+                <button type="button" class="delete-btn" onclick="openDeletePhotoModal('<?= htmlspecialchars($foto); ?>')">
+                  <i class="fas fa-times"></i>
+                </button>
               </div>
             <?php endforeach; ?>
           </div>
@@ -417,7 +472,7 @@ if (isset($_GET['hapus'])) {
 
         <button 
           type="submit" 
-          class="w-full bg-blue-600 text-white p-4 rounded-lg hover:bg-blue-700 shadow-md hover:shadow-lg transition-all flex items-center justify-center"
+          class="update-btn w-full bg-blue-600 text-white p-4 rounded-lg hover:bg-blue-700 shadow-md hover:shadow-lg transition-all flex items-center justify-center"
         >
           <i class="fas fa-save mr-2"></i> Update Wisata
         </button>
@@ -425,9 +480,26 @@ if (isset($_GET['hapus'])) {
     </div>
   </div>
 
+  <!-- Modal Container for Photo Deletion -->
+  <div id="deletePhotoModal" class="modal">
+    <div id="modalContent" class="modal-content">
+      <h2 class="text-2xl font-semibold text-gray-800 mb-4">Hapus Foto</h2>
+      <p class="text-gray-600 mb-6">Apakah Anda yakin ingin menghapus foto ini?</p>
+      <form id="deletePhotoForm" method="POST">
+        <input type="hidden" name="delete_foto" id="deleteFotoInput">
+        <button type="submit" class="btn-danger mb-3">
+          <i class="fas fa-trash mr-2"></i> Hapus
+        </button>
+      </form>
+      <a href="#" class="btn-secondary" onclick="closeDeletePhotoModal()">
+        <i class="fas fa-arrow-left mr-2"></i> Batal
+      </a>
+    </div>
+  </div>
+
   <!-- Toast Notification -->
   <div id="toast" class="toast">
-    Tempat wisata berhasil diperbarui!
+    Aksi berhasil dilakukan!
   </div>
 
   <script>
@@ -455,16 +527,73 @@ if (isset($_GET['hapus'])) {
       }
     });
 
-    // Show Toast if Success
-    window.onload = function() {
-      <?php if (isset($_GET['success']) && $_GET['success'] == '1'): ?>
-        const toast = document.getElementById('toast');
-        toast.style.display = 'block';
+    // Show Toast
+    function showToast(message = 'Aksi berhasil dilakukan!') {
+      const toast = document.getElementById('toast');
+      toast.textContent = message;
+      toast.style.display = 'block';
+      setTimeout(() => {
+        toast.style.display = 'none';
+      }, 3000);
+    }
+
+    // Auto-dismiss success/error messages
+    document.addEventListener('DOMContentLoaded', function() {
+      const messages = document.querySelectorAll('.success-message, .error-message');
+      messages.forEach(message => {
         setTimeout(() => {
-          toast.style.display = 'none';
+          message.style.opacity = '0';
+          setTimeout(() => message.remove(), 300);
         }, 3000);
-      <?php endif; ?>
-    };
+      });
+    });
+
+    // Modal for Photo Deletion
+    function openDeletePhotoModal(fotoName) {
+      const modal = document.getElementById('deletePhotoModal');
+      const deleteFotoInput = document.getElementById('deleteFotoInput');
+      deleteFotoInput.value = fotoName;
+      modal.style.display = 'flex';
+
+      // Handle form submission via AJAX
+      const form = document.getElementById('deletePhotoForm');
+      form.addEventListener('submit', function(e) {
+        e.preventDefault();
+        const formData = new FormData(form);
+
+        fetch(window.location.href, {
+          method: 'POST',
+          body: formData
+        })
+          .then(response => response.json())
+          .then(result => {
+            if (result.success) {
+              showToast(result.message);
+              modal.style.display = 'none';
+              // Refresh the page to update the photo list
+              window.location.reload();
+            } else {
+              showToast(result.message);
+              modal.style.display = 'none';
+            }
+          })
+          .catch(error => {
+            showToast('Terjadi kesalahan saat menghapus foto.');
+            modal.style.display = 'none';
+          });
+      });
+    }
+
+    function closeDeletePhotoModal() {
+      const modal = document.getElementById('deletePhotoModal');
+      modal.style.display = 'none';
+    }
+
+    // Ensure form submission works
+    document.getElementById('updateWisataForm').addEventListener('submit', function(e) {
+      // Ensure the form submits normally if no JavaScript errors occur
+      console.log('Form submission triggered');
+    });
   </script>
 </body>
 </html>
