@@ -64,66 +64,103 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     $nama = $_POST['nama'] ?? '';
     $alamat = $_POST['alamat'] ?? '';
     $deskripsi = $_POST['deskripsi'] ?? '';
-    $longitude = $_POST['longitude'] ?? '';
-    $latitude = $_POST['latitude'] ?? '';
+    $kecamatan = $_POST['kecamatan'] ?? ''; // Ambil nilai kecamatan dari form
+    $longitude = isset($_POST['longitude']) && $_POST['longitude'] !== '' ? (float)$_POST['longitude'] : 0.0;
+    $latitude = isset($_POST['latitude']) && $_POST['latitude'] !== '' ? (float)$_POST['latitude'] : 0.0;
     $fotos = isset($_FILES['fotos']) ? $_FILES['fotos'] : null;
 
-    // Fetch current photos
-    $foto_names = !empty($data['foto']) ? explode(',', $data['foto']) : [];
-    $target_dir = "../Uploads/";
+    // Debugging: Log data yang diterima
+    error_log("POST Data: " . print_r($_POST, true));
+    error_log("FILES Data: " . print_r($_FILES, true));
 
-    // Ensure Uploads folder exists and is writable
-    if (!is_dir($target_dir)) {
-        mkdir($target_dir, 0777, true);
-    }
-    if (!is_writable($target_dir)) {
-        $error_message = "Folder Uploads tidak dapat ditulis. Periksa izin folder.";
+    // Validasi field wajib
+    if (empty($nama) || empty($alamat) || empty($deskripsi) || empty($kecamatan)) {
+        $error_message = "Semua field wajib diisi!";
     } else {
-        // Handle new file uploads
-        if ($fotos && !empty($fotos['name'][0])) {
-            foreach ($fotos['name'] as $key => $name) {
-                if ($fotos['error'][$key] == UPLOAD_ERR_OK) {
-                    // Sanitize filename
-                    $sanitized_name = preg_replace("/[^A-Za-z0-9._-]/", "_", basename($name));
-                    $target_file = $target_dir . $sanitized_name;
-                    $imageFileType = strtolower(pathinfo($target_file, PATHINFO_EXTENSION));
+        // Validasi kecamatan
+        $valid_kecamatan = [
+            'Banjarmasin Selatan',
+            'Banjarmasin Utara',
+            'Banjarmasin Timur',
+            'Banjarmasin Barat',
+            'Banjarmasin Tengah'
+        ];
+        if (!in_array($kecamatan, $valid_kecamatan)) {
+            $error_message = "Kecamatan tidak valid!";
+        } else {
+            // Validasi longitude dan latitude
+            if ($longitude < -180 || $longitude > 180) {
+                $error_message = "Nilai longitude tidak valid (harus antara -180 dan 180).";
+            } elseif ($latitude < -90 || $latitude > 90) {
+                $error_message = "Nilai latitude tidak valid (harus antara -90 dan 90).";
+            } else {
+                // Fetch current photos
+                $foto_names = !empty($data['foto']) ? explode(',', $data['foto']) : [];
+                $target_dir = "../Uploads/";
 
-                    // Validate file type and size
-                    $allowed_types = ['jpg', 'jpeg', 'png', 'gif'];
-                    if (!in_array($imageFileType, $allowed_types)) {
-                        $error_message .= "Tipe file $name tidak diizinkan. Gunakan JPG, JPEG, PNG, atau GIF. ";
-                        continue;
+                // Ensure Uploads folder exists and is writable
+                if (!is_dir($target_dir)) {
+                    mkdir($target_dir, 0777, true);
+                }
+                if (!is_writable($target_dir)) {
+                    $error_message = "Folder Uploads tidak dapat ditulis. Periksa izin folder.";
+                } else {
+                    // Handle new file uploads
+                    if ($fotos && !empty($fotos['name'][0])) {
+                        $total_files = count($foto_names) + count($fotos['name']);
+                        if ($total_files > 5) {
+                            $error_message = "Total foto tidak boleh lebih dari 5. Saat ini ada " . count($foto_names) . " foto.";
+                        } else {
+                            foreach ($fotos['name'] as $key => $name) {
+                                if ($fotos['error'][$key] == UPLOAD_ERR_OK) {
+                                    // Sanitize filename
+                                    $sanitized_name = preg_replace("/[^A-Za-z0-9._-]/", "_", basename($name));
+                                    $target_file = $target_dir . $sanitized_name;
+                                    $imageFileType = strtolower(pathinfo($target_file, PATHINFO_EXTENSION));
+
+                                    // Validate file type and size
+                                    $allowed_types = ['jpg', 'jpeg', 'png', 'gif'];
+                                    if (!in_array($imageFileType, $allowed_types)) {
+                                        $error_message .= "Tipe file $name tidak diizinkan. Gunakan JPG, JPEG, PNG, atau GIF. ";
+                                        continue;
+                                    }
+                                    if ($fotos['size'][$key] > 5 * 1024 * 1024) {
+                                        $error_message .= "Ukuran file $name terlalu besar. Maksimum 5MB. ";
+                                        continue;
+                                    }
+                                    if (move_uploaded_file($fotos['tmp_name'][$key], $target_file)) {
+                                        $foto_names[] = $sanitized_name;
+                                        $success_message .= "Foto $name berhasil diupload. ";
+                                    } else {
+                                        $error_message .= "Gagal mengupload foto $name. Periksa izin folder Uploads atau konfigurasi server. ";
+                                    }
+                                } elseif ($fotos['error'][$key] != UPLOAD_ERR_NO_FILE) {
+                                    $error_message .= "Error upload foto: " . $fotos['error'][$key] . ". ";
+                                }
+                            }
+                        }
                     }
-                    if ($fotos['size'][$key] > 5 * 1024 * 1024) {
-                        $error_message .= "Ukuran file $name terlalu besar. Maksimum 5MB. ";
-                        continue;
+
+                    // Jika tidak ada error, lanjutkan update
+                    if (empty($error_message)) {
+                        // Join filenames into a comma-separated string
+                        $foto_string = implode(',', $foto_names);
+
+                        // Update wisata data using prepared statement, termasuk kecamatan
+                        $stmt = $conn->prepare("UPDATE wisata SET nama = ?, alamat = ?, deskripsi = ?, longitude = ?, latitude = ?, kecamatan = ?, foto = ? WHERE id = ?");
+                        $stmt->bind_param("ssssdssi", $nama, $alamat, $deskripsi, $longitude, $latitude, $kecamatan, $foto_string, $wisata_id);
+                        if ($stmt->execute()) {
+                            $_SESSION['success'] = "Tempat wisata berhasil diperbarui!";
+                            header("Location: dashboard.php");
+                            exit;
+                        } else {
+                            $error_message .= "Gagal mengupdate wisata: " . $conn->error;
+                        }
+                        $stmt->close();
                     }
-                    if (move_uploaded_file($fotos['tmp_name'][$key], $target_file)) {
-                        $foto_names[] = $sanitized_name;
-                        $success_message .= "Foto $name berhasil diupload. ";
-                    } else {
-                        $error_message .= "Gagal mengupload foto $name. Periksa izin folder Uploads atau konfigurasi server. ";
-                    }
-                } elseif ($fotos['error'][$key] != UPLOAD_ERR_NO_FILE) {
-                    $error_message .= "Error upload foto: " . $fotos['error'][$key] . ". ";
                 }
             }
         }
-
-        // Join filenames into a comma-separated string
-        $foto_string = implode(',', $foto_names);
-
-        // Update wisata data using prepared statement
-        $stmt = $conn->prepare("UPDATE wisata SET nama = ?, alamat = ?, deskripsi = ?, longitude = ?, latitude = ?, foto = ? WHERE id = ?");
-        $stmt->bind_param("ssssssi", $nama, $alamat, $deskripsi, $longitude, $latitude, $foto_string, $wisata_id);
-        if ($stmt->execute()) {
-            $_SESSION['success'] = "Tempat wisata berhasil diperbarui!";
-            header("Location: dashboard.php");
-            exit;
-        } else {
-            $error_message .= "Gagal mengupdate wisata: " . $conn->error;
-        }
-        $stmt->close();
     }
 }
 
