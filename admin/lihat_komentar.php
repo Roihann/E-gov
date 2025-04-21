@@ -14,7 +14,7 @@ if (!isset($_GET['id']) || !is_numeric($_GET['id'])) {
     exit;
 }
 
-$wisata_id = $_GET['id'];
+$wisata_id = (int)$_GET['id'];
 
 // Ambil data tempat wisata berdasarkan ID
 $wisata = mysqli_query($conn, "SELECT * FROM wisata WHERE id = $wisata_id");
@@ -40,6 +40,14 @@ $pengaduan = mysqli_query($conn, "
     WHERE pengaduan.wisata_id = $wisata_id
     ORDER BY pengaduan.created_at DESC
 ");
+
+// Handle success or error messages from session
+$success_message = isset($_SESSION['success']) ? $_SESSION['success'] : '';
+$error_message = isset($_SESSION['error']) ? $_SESSION['error'] : '';
+
+// Clear session messages to prevent persistence on refresh
+unset($_SESSION['success']);
+unset($_SESSION['error']);
 ?>
 
 <!DOCTYPE html>
@@ -105,6 +113,11 @@ $pengaduan = mysqli_query($conn, "
       transform: translateY(-2px);
       box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
     }
+    .comment-card p, .complaint-card p {
+      max-width: 60ch; /* Approx 60 characters */
+      overflow-wrap: break-word; /* Ensure long words break */
+      word-break: break-word; /* Additional breaking for very long strings */
+    }
     .delete-btn {
       background-color: #ef4444;
       color: white;
@@ -114,6 +127,20 @@ $pengaduan = mysqli_query($conn, "
     }
     .delete-btn:hover {
       background-color: #dc2626;
+    }
+    .success-message {
+      background-color: #d4edda;
+      color: #155724;
+      padding: 1rem;
+      border-radius: 0.375rem;
+      margin-bottom: 1rem;
+    }
+    .error-message {
+      background-color: #f8d7da;
+      color: #721c24;
+      padding: 1rem;
+      border-radius: 0.375rem;
+      margin-bottom: 1rem;
     }
     @keyframes fadeIn {
       from { opacity: 0; transform: translateY(20px); }
@@ -148,6 +175,18 @@ $pengaduan = mysqli_query($conn, "
     <div class="card-container">
       <h2 class="text-2xl font-semibold text-gray-900 mb-6 text-center">Komentar & Pengaduan untuk <?= htmlspecialchars($data_wisata['nama']); ?></h2>
 
+      <!-- Display Success or Error Messages -->
+      <?php if ($success_message): ?>
+        <div class="success-message">
+          <?= htmlspecialchars($success_message); ?>
+        </div>
+      <?php endif; ?>
+      <?php if ($error_message): ?>
+        <div class="error-message">
+          <?= htmlspecialchars($error_message); ?>
+        </div>
+      <?php endif; ?>
+
       <!-- Komentar -->
       <div class="mb-6">
         <h4 class="text-lg font-semibold text-gray-900 mb-4">Komentar</h4>
@@ -157,10 +196,10 @@ $pengaduan = mysqli_query($conn, "
               <div class="flex justify-between items-start">
                 <div>
                   <strong class="text-gray-800"><?= htmlspecialchars($row['username']); ?>:</strong>
-                  <p class="text-gray-700 mt-1"><?= htmlspecialchars($row['isi_komentar']); ?></p>
+                  <p class="text-gray-700 mt-1 break-words"><?= htmlspecialchars($row['isi_komentar']); ?></p>
                   <small class="text-gray-600"><?= $row['created_at']; ?></small>
                 </div>
-                <a href="hapus_komentar.php?id=<?= $row['komentar_id']; ?>" class="delete-btn flex items-center" onclick="return confirm('Apakah Anda yakin ingin menghapus komentar ini?')">
+                <a href="hapus_komentar.php?id=<?= $row['komentar_id']; ?>&wisata_id=<?= $wisata_id; ?>" class="delete-btn flex items-center" onclick="return confirm('Apakah Anda yakin ingin menghapus komentar ini?')">
                   <i class="fas fa-trash mr-1"></i> Hapus
                 </a>
               </div>
@@ -180,7 +219,7 @@ $pengaduan = mysqli_query($conn, "
               <div class="flex justify-between items-start">
                 <div>
                   <strong class="text-gray-800"><?= htmlspecialchars($row['username']); ?>:</strong>
-                  <p class="text-gray-700 mt-1"><?= htmlspecialchars($row['isi_pengaduan']); ?></p>
+                  <p class="text-gray-700 mt-1 break-words"><?= htmlspecialchars($row['isi_pengaduan']); ?></p>
                   <small class="text-gray-600"><?= $row['created_at']; ?></small>
                 </div>
                 <a href="hapus_pengaduan.php?id=<?= $row['pengaduan_id']; ?>" class="delete-btn flex items-center" onclick="return confirm('Apakah Anda yakin ingin menghapus pengaduan ini?')">

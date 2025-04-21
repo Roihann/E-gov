@@ -61,6 +61,8 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     $nama = mysqli_real_escape_string($conn, $_POST['nama'] ?? '');
     $alamat = mysqli_real_escape_string($conn, $_POST['alamat'] ?? '');
     $deskripsi = mysqli_real_escape_string($conn, $_POST['deskripsi'] ?? '');
+    $longitude = mysqli_real_escape_string($conn, $_POST['longitude'] ?? '');
+    $latitude = mysqli_real_escape_string($conn, $_POST['latitude'] ?? '');
     $fotos = isset($_FILES['fotos']) ? $_FILES['fotos'] : null;
 
     // Ambil foto yang ada
@@ -107,7 +109,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         $foto_string = implode(',', $foto_names);
 
         // Update data tempat wisata
-        $sql = "UPDATE wisata SET nama='$nama', alamat='$alamat', deskripsi='$deskripsi', foto='$foto_string' WHERE id=$wisata_id";
+        $sql = "UPDATE wisata SET nama='$nama', alamat='$alamat', deskripsi='$deskripsi', longitude='$longitude', latitude='$latitude', foto='$foto_string' WHERE id=$wisata_id";
         if (mysqli_query($conn, $sql)) {
             $success_message .= "Tempat wisata berhasil diperbarui!";
             header("Location: dashboard.php?success=1");
@@ -278,7 +280,6 @@ if (isset($_GET['hapus'])) {
     </div>
     <a href="dashboard.php" class="flex items-center"><i class="fas fa-home mr-2"></i> Dashboard</a>
     <a href="tambah_wisata.php" class="flex items-center active"><i class="fas fa-plus mr-2"></i> Tambah Wisata</a>
-
   </div>
 
   <!-- Main Content -->
@@ -337,6 +338,41 @@ if (isset($_GET['hapus'])) {
               required
             ><?= htmlspecialchars($data['deskripsi']); ?></textarea>
             <i class="fas fa-pen absolute left-4 top-4 text-gray-400"></i>
+          </div>
+        </div>
+
+        <div class="mb-5">
+          <div class="flex gap-4">
+            <div class="flex-1">
+              <label for="longitude" class="block text-gray-900 font-medium mb-2">Longitude</label>
+              <div class="relative">
+                <input 
+                  type="number" 
+                  step="any" 
+                  name="longitude" 
+                  id="longitude" 
+                  class="w-full p-4 pl-12 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 shadow-sm transition-all" 
+                  value="<?= htmlspecialchars($data['longitude'] ?? ''); ?>" 
+                  required
+                >
+                <i class="fas fa-globe absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400"></i>
+              </div>
+            </div>
+            <div class="flex-1">
+              <label for="latitude" class="block text-gray-900 font-medium mb-2">Latitude</label>
+              <div class="relative">
+                <input 
+                  type="number" 
+                  step="any" 
+                  name="latitude" 
+                  id="latitude" 
+                  class="w-full p-4 pl-12 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 shadow-sm transition-all" 
+                  value="<?= htmlspecialchars($data['latitude'] ?? ''); ?>" 
+                  required
+                >
+                <i class="fas fa-globe absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400"></i>
+              </div>
+            </div>
           </div>
         </div>
 
