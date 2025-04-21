@@ -278,8 +278,7 @@ if (isset($_GET['hapus'])) {
     </div>
     <a href="dashboard.php" class="flex items-center"><i class="fas fa-home mr-2"></i> Dashboard</a>
     <a href="tambah_wisata.php" class="flex items-center active"><i class="fas fa-plus mr-2"></i> Tambah Wisata</a>
-    <a href="kelola_komentar.php" class="flex items-center"><i class="fas fa-comments mr-2"></i> Kelola Komentar</a>
-    <a href="kelola_pengguna.php" class="flex items-center"><i class="fas fa-users mr-2"></i> Kelola Pengguna</a>
+
   </div>
 
   <!-- Main Content -->

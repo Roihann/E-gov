@@ -227,10 +227,7 @@ if (!$wisata) {
           $cover_image = trim($fotos[0]);
           $index++;
           ?>
-          <a href="detail.php?id=<?= $row['id']; ?>" class="wisata-card" data-aos="fade-up" data-aos-delay="<?= $index * 100 ?>">
-            <?php if ($index <= 2): // Badge "Populer" untuk 2 kartu pertama ?>
-              <span class="badge">Populer</span>
-            <?php endif; ?>
+          <a href="detail.php?id=<?= $row['id']; ?>" class="wisata-card" data-aos="fade-up" data-aos-delay="<?= $index * 100 ?>">        
             <img src="../Uploads/<?= htmlspecialchars($cover_image); ?>" alt="<?= htmlspecialchars($row['nama']); ?>" class="w-full h-48 object-cover">
             <div class="content">
               <h5><?= htmlspecialchars($row['nama']); ?></h5>
