@@ -17,12 +17,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     $nama = mysqli_real_escape_string($conn, $_POST['nama'] ?? '');
     $alamat = mysqli_real_escape_string($conn, $_POST['alamat'] ?? '');
     $deskripsi = mysqli_real_escape_string($conn, $_POST['deskripsi'] ?? '');
-<<<<<<< HEAD
     $kecamatan = mysqli_real_escape_string($conn, $_POST['kecamatan'] ?? 'Banjarmasin'); // Ambil kecamatan dari form
-=======
-    $longitude = mysqli_real_escape_string($conn, $_POST['longitude'] ?? '');
-    $latitude = mysqli_real_escape_string($conn, $_POST['latitude'] ?? '');
->>>>>>> ziman2
     $fotos = isset($_FILES['fotos']) ? $_FILES['fotos'] : null;
 
     $foto_names = [];
@@ -67,14 +62,9 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
 
         if (empty($error_message)) {
             $foto_string = implode(',', $foto_names);
-<<<<<<< HEAD
-            // Simpan kecamatan ke database
-            $sql = "INSERT INTO wisata (nama, alamat, deskripsi, foto, kecamatan) VALUES ('$nama', '$alamat', '$deskripsi', '$foto_string', '$kecamatan')";
-=======
 
             // Insert data into database
             $sql = "INSERT INTO wisata (nama, alamat, deskripsi, longitude, latitude, foto) VALUES ('$nama', '$alamat', '$deskripsi', '$longitude', '$latitude', '$foto_string')";
->>>>>>> ziman2
             if (mysqli_query($conn, $sql)) {
                 $success_message .= "Tempat wisata berhasil ditambahkan!";
                 header("Location: dashboard.php?success=1");
