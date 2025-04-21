@@ -17,6 +17,7 @@ if (!$wisata || mysqli_num_rows($wisata) == 0) {
 $data = mysqli_fetch_assoc($wisata);
 
 <<<<<<< HEAD
+<<<<<<< HEAD
 if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     $nama = mysqli_real_escape_string($conn, $_POST['nama']);
     $alamat = mysqli_real_escape_string($conn, $_POST['alamat']);
@@ -66,6 +67,8 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     } else {
         echo "Gagal mengupdate wisata: " . mysqli_error($conn);
 =======
+=======
+>>>>>>> roihan
 $error_message = '';
 $success_message = '';
 
@@ -174,7 +177,10 @@ if (isset($_GET['hapus'])) {
         $success_message = "Foto berhasil dihapus!";
     } elseif ($_GET['hapus'] == 'error') {
         $error_message = isset($_GET['msg']) ? urldecode($_GET['msg']) : "Gagal menghapus foto.";
+<<<<<<< HEAD
 >>>>>>> main
+=======
+>>>>>>> roihan
     }
 }
 ?>
@@ -322,6 +328,7 @@ if (isset($_GET['hapus'])) {
   </style>
 </head>
 <<<<<<< HEAD
+<<<<<<< HEAD
 <body class="bg-light">
 <div class="container py-4">
   <h2 class="mb-4">Edit Tempat Wisata</h2>
@@ -364,6 +371,8 @@ if (isset($_GET['hapus'])) {
 </div>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 =======
+=======
+>>>>>>> roihan
 <body>
   <!-- Sidebar -->
   <div class="sidebar">
@@ -524,6 +533,9 @@ if (isset($_GET['hapus'])) {
       <?php endif; ?>
     };
   </script>
+<<<<<<< HEAD
 >>>>>>> main
+=======
+>>>>>>> roihan
 </body>
 </html>

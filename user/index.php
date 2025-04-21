@@ -226,12 +226,15 @@ if (!$wisata) {
           $fotos = !empty($row['foto']) ? explode(',', $row['foto']) : ['default.jpg'];
           $cover_image = trim($fotos[0]);
 <<<<<<< HEAD
+<<<<<<< HEAD
           ?>
           <a href="detail.php?id=<?= $row['id']; ?>" class="wisata-card bg-white rounded-xl shadow-md overflow-hidden">
             <img src="../Uploads/<?= htmlspecialchars($cover_image); ?>" alt="<?= htmlspecialchars($row['nama']); ?>" class="w-full h-48 object-cover">
             <div class="p-4 text-center">
               <h5 class="text-lg font-semibold text-gray-800"><?= htmlspecialchars($row['nama']); ?></h5>
 =======
+=======
+>>>>>>> roihan
           $index++;
           ?>
           <a href="detail.php?id=<?= $row['id']; ?>" class="wisata-card" data-aos="fade-up" data-aos-delay="<?= $index * 100 ?>">        
@@ -242,7 +245,10 @@ if (!$wisata) {
                 <i class="fas fa-map-marker-alt"></i>
                 Banjarmasin
               </p>
+<<<<<<< HEAD
 >>>>>>> main
+=======
+>>>>>>> roihan
             </div>
           </a>
         <?php endwhile; ?>

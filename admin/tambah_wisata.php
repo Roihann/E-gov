@@ -12,6 +12,7 @@ $success_message = '';
 
 if ($_SERVER['REQUEST_METHOD'] == 'POST') {
 <<<<<<< HEAD
+<<<<<<< HEAD
     $nama = mysqli_real_escape_string($conn, $_POST['nama']);
     $alamat = mysqli_real_escape_string($conn, $_POST['alamat']);
     $deskripsi = mysqli_real_escape_string($conn, $_POST['deskripsi']);
@@ -47,6 +48,8 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     } else {
         echo "Gagal menambah wisata: " . mysqli_error($conn);
 =======
+=======
+>>>>>>> roihan
     // Debugging: Cetak semua data yang diterima
     error_log("POST Data: " . print_r($_POST, true));
     error_log("FILES Data: " . print_r($_FILES, true));
@@ -115,7 +118,10 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                 $error_message .= "Gagal menambah wisata: " . mysqli_error($conn);
             }
         }
+<<<<<<< HEAD
 >>>>>>> main
+=======
+>>>>>>> roihan
     }
 }
 ?>
@@ -337,6 +343,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
       </form>
     </div>
 <<<<<<< HEAD
+<<<<<<< HEAD
     <div class="mb-3">
       <label for="deskripsi" class="form-label">Deskripsi</label>
       <textarea name="deskripsi" class="form-control" rows="4" required></textarea>
@@ -351,6 +358,8 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
 </div>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 =======
+=======
+>>>>>>> roihan
   </div>
 
   <!-- Toast Notification -->
@@ -399,6 +408,9 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
       <?php endif; ?>
     };
   </script>
+<<<<<<< HEAD
 >>>>>>> main
+=======
+>>>>>>> roihan
 </body>
 </html>

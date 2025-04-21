@@ -159,6 +159,7 @@ $images = !empty($data['foto']) ? explode(',', $data['foto']) : ['default.jpg'];
       width: 100%;
     }
 <<<<<<< HEAD
+<<<<<<< HEAD
     .carousel {
       position: relative;
       overflow: hidden;
@@ -189,6 +190,8 @@ $images = !empty($data['foto']) ? explode(',', $data['foto']) : ['default.jpg'];
     .carousel-button.next {
       right: 10px;
 =======
+=======
+>>>>>>> roihan
 
     /* Detail Info */
     .detail-info {
@@ -269,7 +272,10 @@ $images = !empty($data['foto']) ? explode(',', $data['foto']) : ['default.jpg'];
         border-radius: 8px;
         margin-top: 0.5rem;
         border: 1px solid #d1d5db;
+<<<<<<< HEAD
 >>>>>>> main
+=======
+>>>>>>> roihan
     }
   </style>
 </head>
@@ -300,10 +306,14 @@ $images = !empty($data['foto']) ? explode(',', $data['foto']) : ['default.jpg'];
             <div class="carousel-inner" id="carouselInner">
               <?php foreach ($images as $index => $image): ?>
 <<<<<<< HEAD
+<<<<<<< HEAD
                 <div class="carousel-item">
 =======
                 <div class="carousel-item <?= $index === 0 ? 'active' : '' ?>">
 >>>>>>> main
+=======
+                <div class="carousel-item <?= $index === 0 ? 'active' : '' ?>">
+>>>>>>> roihan
                   <img src="../Uploads/<?= htmlspecialchars(trim($image)); ?>" class="wisata-image" alt="<?= htmlspecialchars($data['nama']); ?> Image <?= $index + 1; ?>">
                 </div>
               <?php endforeach; ?>
@@ -312,12 +322,15 @@ $images = !empty($data['foto']) ? explode(',', $data['foto']) : ['default.jpg'];
               <button class="carousel-button prev" onclick="moveSlide(-1)"><i class="fas fa-chevron-left"></i></button>
               <button class="carousel-button next" onclick="moveSlide(1)"><i class="fas fa-chevron-right"></i></button>
 <<<<<<< HEAD
+<<<<<<< HEAD
             <?php endif; ?>
           </div>
           <div class="space-y-4">
             <p><strong class="text-gray-700">Alamat:</strong> <?= htmlspecialchars($data['alamat']); ?></p>
             <p><strong class="text-gray-700">Deskripsi:</strong> <?= htmlspecialchars($data['deskripsi']); ?></p>
 =======
+=======
+>>>>>>> roihan
               <!-- Carousel Dots -->
               <div class="carousel-dots">
                 <?php foreach ($images as $index => $image): ?>
@@ -325,7 +338,10 @@ $images = !empty($data['foto']) ? explode(',', $data['foto']) : ['default.jpg'];
                 <?php endforeach; ?>
               </div>
             <?php endif; ?>
+<<<<<<< HEAD
 >>>>>>> main
+=======
+>>>>>>> roihan
           </div>
           <div class="space-y-4">
             <p class="detail-info"><i class="fas fa-map-marker-alt"></i> <strong>Alamat:</strong> <?= htmlspecialchars($data['alamat']); ?></p>
@@ -401,9 +417,12 @@ $images = !empty($data['foto']) ? explode(',', $data['foto']) : ['default.jpg'];
     let currentSlide = 0;
     const slides = document.querySelectorAll('.carousel-item');
 <<<<<<< HEAD
+<<<<<<< HEAD
     const totalSlides = slides.length;
 
 =======
+=======
+>>>>>>> roihan
     const dots = document.querySelectorAll('.carousel-dot');
     const totalSlides = slides.length;
 
@@ -424,7 +443,10 @@ $images = !empty($data['foto']) ? explode(',', $data['foto']) : ['default.jpg'];
       carouselInner.style.transform = `translateX(-${currentSlide * 100}%)`;
     }
 
+<<<<<<< HEAD
 >>>>>>> main
+=======
+>>>>>>> roihan
     function moveSlide(direction) {
       currentSlide += direction;
       if (currentSlide >= totalSlides) {
@@ -436,6 +458,7 @@ $images = !empty($data['foto']) ? explode(',', $data['foto']) : ['default.jpg'];
     }
 
 <<<<<<< HEAD
+<<<<<<< HEAD
     function updateCarousel() {
       const carouselInner = document.getElementById('carouselInner');
       carouselInner.style.transform = `translateX(-${currentSlide * 100}%)`;
@@ -446,6 +469,8 @@ $images = !empty($data['foto']) ? explode(',', $data['foto']) : ['default.jpg'];
       moveSlide(1);
     }, 5000);
 =======
+=======
+>>>>>>> roihan
     function goToSlide(index) {
       currentSlide = index;
       updateCarousel();
@@ -497,7 +522,10 @@ $images = !empty($data['foto']) ? explode(',', $data['foto']) : ['default.jpg'];
                   .openPopup();
           }
       });
+<<<<<<< HEAD
 >>>>>>> main
+=======
+>>>>>>> roihan
   </script>
 </body>
 </html>
