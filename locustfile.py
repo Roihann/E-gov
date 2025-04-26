@@ -10,7 +10,7 @@ class EGoVUser(HttpUser):
             "/php/e-gov/auth/login.php",
             data={
                 "username": "khalid",
-                "password": "khalid321"
+                "password": "123123"
             },
             allow_redirects=False  # Jangan ikuti redirect otomatis
         )

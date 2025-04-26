@@ -7,16 +7,46 @@ if (!isset($_SESSION['user_id']) || $_SESSION['role'] != 'user') {
     exit;
 }
 
+// Pagination settings
+$items_per_page = 12;
+$page = isset($_GET['page']) ? (int)$_GET['page'] : 1;
+$offset = ($page - 1) * $items_per_page;
+
 $keyword = isset($_GET['search']) ? mysqli_real_escape_string($conn, $_GET['search']) : '';
 
+// Count total records for pagination
 if (!empty($keyword)) {
-    $wisata = mysqli_query($conn, "SELECT id, nama, foto, kecamatan FROM wisata WHERE nama LIKE '%$keyword%'");
+    $count_query = mysqli_query($conn, "SELECT COUNT(*) as total FROM wisata WHERE nama LIKE '%$keyword%'");
 } else {
-    $wisata = mysqli_query($conn, "SELECT id, nama, foto, kecamatan FROM wisata");
+    $count_query = mysqli_query($conn, "SELECT COUNT(*) as total FROM wisata");
+}
+$count_result = mysqli_fetch_assoc($count_query);
+$total_items = $count_result['total'];
+$total_pages = ceil($total_items / $items_per_page);
+
+// Fetch data with LIMIT and OFFSET for pagination
+if (!empty($keyword)) {
+    $wisata = mysqli_query($conn, "SELECT id, nama, foto, kecamatan FROM wisata WHERE nama LIKE '%$keyword%' LIMIT $items_per_page OFFSET $offset");
+} else {
+    $wisata = mysqli_query($conn, "SELECT id, nama, foto, kecamatan FROM wisata LIMIT $items_per_page OFFSET $offset");
 }
 
 if (!$wisata) {
     die("Query failed: " . mysqli_error($conn));
+}
+
+// Pagination display settings
+$max_visible_pages = 5; // Maximum number of page buttons to show
+$start_page = max(1, $page - 2);
+$end_page = min($total_pages, $page + 2);
+
+// Adjust start and end to always show 5 pages if possible
+if ($end_page - $start_page + 1 < $max_visible_pages) {
+    if ($start_page == 1) {
+        $end_page = min($total_pages, $start_page + $max_visible_pages - 1);
+    } else {
+        $start_page = max(1, $end_page - $max_visible_pages + 1);
+    }
 }
 ?>
 
@@ -163,6 +193,44 @@ if (!$wisata) {
       margin-right: 6px;
       color: #a855f7;
     }
+
+    /* Pagination Styles */
+    .pagination {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      margin-top: 2rem;
+      gap: 0.5rem;
+    }
+    .pagination a, .pagination span {
+      padding: 0.5rem 1rem;
+      border-radius: 50px;
+      font-size: 1rem;
+      transition: all 0.3s ease;
+      text-decoration: none;
+    }
+    .pagination a {
+      background: linear-gradient(90deg, #4f46e5, #a855f7);
+      color: white;
+    }
+    .pagination a:hover {
+      transform: scale(1.05);
+      box-shadow: 0 4px 12px rgba(79, 70, 229, 0.3);
+    }
+    .pagination span.active {
+      background: linear-gradient(90deg, #f97316, #facc15);
+      color: #1f2937;
+      font-weight: 600;
+    }
+    .pagination .disabled {
+      background: #d1d5db;
+      color: #6b7280;
+      pointer-events: none;
+    }
+    .pagination .dots {
+      padding: 0.5rem;
+      color: #6b7280;
+    }
   </style>
 </head>
 <body class="bg-gray-50">
@@ -233,6 +301,58 @@ if (!$wisata) {
         </div>
       <?php endif; ?>
     </div>
+
+    <!-- Pagination -->
+    <?php if (mysqli_num_rows($wisata) > 0 && $total_pages > 1): ?>
+      <div class="pagination">
+        <!-- First Button -->
+        <?php if ($page > 1): ?>
+          <a href="?page=1&search=<?= htmlspecialchars($keyword) ?>">First</a>
+        <?php else: ?>
+          <span class="disabled">First</span>
+        <?php endif; ?>
+
+        <!-- Previous Button -->
+        <?php if ($page > 1): ?>
+          <a href="?page=<?= $page - 1 ?>&search=<?= htmlspecialchars($keyword) ?>">Previous</a>
+        <?php else: ?>
+          <span class="disabled">Previous</span>
+        <?php endif; ?>
+
+        <!-- Dots Before -->
+        <?php if ($start_page > 1): ?>
+          <span class="dots">...</span>
+        <?php endif; ?>
+
+        <!-- Page Numbers -->
+        <?php for ($i = $start_page; $i <= $end_page; $i++): ?>
+          <?php if ($i == $page): ?>
+            <span class="active"><?= $i ?></span>
+          <?php else: ?>
+            <a href="?page=<?= $i ?>&search=<?= htmlspecialchars($keyword) ?>"><?= $i ?></a>
+          <?php endif; ?>
+        <?php endfor; ?>
+
+        <!-- Dots After -->
+        <?php if ($end_page < $total_pages): ?>
+          <span class="dots">...</span>
+        <?php endif; ?>
+
+        <!-- Next Button -->
+        <?php if ($page < $total_pages): ?>
+          <a href="?page=<?= $page + 1 ?>&search=<?= htmlspecialchars($keyword) ?>">Next</a>
+        <?php else: ?>
+          <span class="disabled">Next</span>
+        <?php endif; ?>
+
+        <!-- Last Button -->
+        <?php if ($page < $total_pages): ?>
+          <a href="?page=<?= $total_pages ?>&search=<?= htmlspecialchars($keyword) ?>">Last</a>
+        <?php else: ?>
+          <span class="disabled">Last</span>
+        <?php endif; ?>
+      </div>
+    <?php endif; ?>
   </div>
 
   <!-- AOS Script -->
