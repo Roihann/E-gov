@@ -2,7 +2,7 @@
 $host = "localhost";
 $user = "root";
 $pass = "";
-$db   = "stress_test";
+$db   = "wisata";
 
 $conn = mysqli_connect($host, $user, $pass, $db);
 
